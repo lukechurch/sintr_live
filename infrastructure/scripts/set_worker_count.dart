@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 // Run from the root of the sintr_live checkout
+// Generally this should be used via the set_worker_count.sh script
 
 import 'dart:io';
 import 'dart:async';

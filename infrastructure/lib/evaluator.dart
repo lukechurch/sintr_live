@@ -43,7 +43,7 @@ Future<String> eval(Map<String, String> source, String message) async {
   log.trace("_installSource done, about to _resetWorker (${sw.elapsedMilliseconds}ms)");
   _resetWorker("Always reset policy");
   log.trace("_resetWorker done, about to _resetWorker (${sw.elapsedMilliseconds}ms)");
-  _setupIsolate(path.join(workingPath, ISOLATE_STARTUP_NAME));
+  await _setupIsolate(path.join(workingPath, ISOLATE_STARTUP_NAME));
 
   log.trace("Sending: $message (${sw.elapsedMilliseconds}ms)");
   sendPort.send(message);
@@ -165,7 +165,7 @@ _resetWorker(String cause) async {
   isolate = null;
 
   log.debug("ResultsStream == null: ${resultsStream == null}");
-  resultsController.close();
+  resultsController?.close();
   await resultsStream?.drain();
   log.debug("Isolate now null");
 }

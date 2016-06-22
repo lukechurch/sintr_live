@@ -9,5 +9,6 @@
 import 'dart:async';
 
 Future<String> sintrEntryPoint(String msg) async {
-  throw "Please replace the entry point";
+  // throw "Please replace the entry point";
+  return "Sample string-$msg";
 }

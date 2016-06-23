@@ -11,7 +11,7 @@ dependencies:
   logging: '>=0.11.1 <0.12.0'
   crypto: '>=0.9.0 <0.10.0'
   path: any
-  sintr_common:
-    git: https://github.com/lukechurch/sintr_common.git
+  sintr_live_common:
+    git: https://github.com/lukechurch/sintr_live_common.git
 # dev_dependencies:
   # test: '>=0.12.0 <0.13.0'

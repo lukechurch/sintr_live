@@ -13,7 +13,7 @@ import 'dart:isolate';
 
 import 'package:sintr_live_infrastructure/_isolate_main.dart';
 
-import 'package:sintr_common/source_utils.dart' as src_utils;
+import 'package:sintr_live_common/source_utils.dart' as src_utils;
 import 'package:path/path.dart' as path;
 import 'package:sintr_live_infrastructure/log.dart' as log;
 

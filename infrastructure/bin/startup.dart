@@ -81,21 +81,21 @@ _handleTask(tasks.Task task, String jobName) async {
   try {
     await task.setState(tasks.LifecycleState.STARTED);
 
-    log.trace("About to get source (${sw.elapsedMilliseconds}ms)");
+    log.trace("About to get source (startup._handleTask: ${sw.elapsedMilliseconds}ms)");
     Map<String, String> source = await task.source;
 
-    log.trace("About to get input (${sw.elapsedMilliseconds}ms)");
+    log.trace("About to get input (startup._handleTask: ${sw.elapsedMilliseconds}ms)");
     String input = await task.input;
 
-    log.trace("About to execute (${sw.elapsedMilliseconds}ms)");
+    log.trace("About to execute (startup._handleTask: ${sw.elapsedMilliseconds}ms)");
     String response = await eval.eval(source, input);
 
-    log.trace("Execution complete (${sw.elapsedMilliseconds}ms)");
+    log.trace("Execution complete (startup._handleTask: ${sw.elapsedMilliseconds}ms)");
 
     // TODO Handle the case where the result is too large to put in a
     // datastore entry
 
-    log.trace("About to set result (${sw.elapsedMilliseconds}ms)");
+    log.trace("About to set result (startup._handleTask: ${sw.elapsedMilliseconds}ms)");
     await task.setResult(response);
 
     await task.setState(tasks.LifecycleState.DONE);

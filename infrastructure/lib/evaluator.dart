@@ -15,7 +15,8 @@ import 'package:sintr_live_infrastructure/_isolate_main.dart';
 
 import 'package:sintr_live_common/source_utils.dart' as src_utils;
 import 'package:path/path.dart' as path;
-import 'package:sintr_live_infrastructure/log.dart' as log;
+// import 'package:sintr_live_infrastructure/log.dart' as log;
+import 'package:sintr_live_common/logging_utils.dart' as log;
 
 SendPort sendPort;
 ReceivePort receivePort;
@@ -36,20 +37,20 @@ String workingPath = null;
 Future<String> eval(Map<String, String> source, String message) async {
   Stopwatch sw = new Stopwatch()..start();
 
-  log.trace("about to _prepareSetup (${sw.elapsedMilliseconds}ms)");
+  log.trace("about to _prepareSetup (eval: ${sw.elapsedMilliseconds}ms)", 1);
   _prepareSetup();
-  log.trace("_prepareSetup done, about to _installSource (${sw.elapsedMilliseconds}ms)");
+  log.trace("_prepareSetup done, about to _installSource (eval: ${sw.elapsedMilliseconds}ms)", 1);
   _installSource(source);
-  log.trace("_installSource done, about to _resetWorker (${sw.elapsedMilliseconds}ms)");
+  log.trace("_installSource done, about to _resetWorker (eval: ${sw.elapsedMilliseconds}ms)", 1);
   _resetWorker("Always reset policy");
-  log.trace("_resetWorker done, about to _resetWorker (${sw.elapsedMilliseconds}ms)");
+  log.trace("_resetWorker done, about to _resetWorker (eval: ${sw.elapsedMilliseconds}ms)", 1);
   await _setupIsolate(path.join(workingPath, ISOLATE_STARTUP_NAME));
 
-  log.trace("Sending: $message (${sw.elapsedMilliseconds}ms)");
+  log.trace("Sending: $message (eval: ${sw.elapsedMilliseconds}ms)", 1);
   sendPort.send(message);
 
   String response = await resultsStream.first;
-  log.debug("Response: $response (${sw.elapsedMilliseconds}ms)");
+  log.debug("Response: $response (eval: ${sw.elapsedMilliseconds}ms)", 1);
 
   return response;
 }
@@ -118,25 +119,25 @@ _pubUpdate(List<String> pubspecPathsToUpdate) async {
 }
 
 _setupIsolate(String startPath) async {
-  log.debug("isolate == null: ${isolate == null}");
-  log.debug("_setupIsolate: $startPath");
+  log.debug("isolate == null: ${isolate == null}", 2);
+  log.debug("_setupIsolate: $startPath", 2);
   sendPort = null;
   receivePort = new ReceivePort();
   resultsController = new StreamController();
   resultsStream = resultsController.stream.asBroadcastStream();
 
-  log.debug("About to bind to recieve port");
+  log.debug("About to bind to recieve port", 2);
   receivePort.listen((msg) {
-    log.trace("recievePort message: $msg");
+    log.trace("recievePort message: $msg", 2);
 
     if (sendPort == null) {
-      log.debug("send port recieved");
+      log.debug("send port recieved", 2);
       sendPort = msg;
     } else {
       resultsController.add(msg);
     }
   });
-  log.debug("About to spawn isolate");
+  log.debug("About to spawn isolate", 2);
   isolate =
       await Isolate.spawnUri(
         Uri.parse(startPath),
@@ -144,28 +145,28 @@ _setupIsolate(String startPath) async {
         receivePort.sendPort,
         errorsAreFatal: false,
       automaticPackageResolution : true);
-  log.debug("Isolate spawned");
+  log.debug("Isolate spawned", 2);
   int spinCounter = 0;
   while (sendPort == null && spinCounter++ < MAX_SPIN_WAITS_FOR_SEND_PORT) {
-    log.debug("About to poll wait: $spinCounter");
+    log.debug("About to poll wait: $spinCounter", 2);
     await new Future.delayed(new Duration(milliseconds: 1));
-    log.debug("Spinning waiting for send port: $spinCounter");
+    log.debug("Spinning waiting for send port: $spinCounter", 2);
   }
 
   if (sendPort == null) {
     throw "sendPort was not recieved after $MAX_SPIN_WAITS_FOR_SEND_PORT waits";
   }
-  log.info("Worker isolate spawned");
+  log.info("Worker isolate spawned", 2);
 }
 
 _resetWorker(String cause) async {
-  log.debug("Restarting isolate due to: $cause");
-  log.debug("About to kill, isolate == null: ${isolate == null}");
+  log.debug("Restarting isolate due to: $cause", 2);
+  log.debug("About to kill, isolate == null: ${isolate == null}", 2);
   isolate?.kill(priority: Isolate.IMMEDIATE);
   isolate = null;
 
-  log.debug("ResultsStream == null: ${resultsStream == null}");
+  log.debug("ResultsStream == null: ${resultsStream == null}", 2);
   resultsController?.close();
   await resultsStream?.drain();
-  log.debug("Isolate now null");
+  log.debug("Isolate now null", 2);
 }

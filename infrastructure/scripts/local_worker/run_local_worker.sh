@@ -18,9 +18,18 @@ rm -r ~/sintr-local-instrastructure
 mkdir -p ~/sintr-local-instrastructure
 cd ~/sintr-local-instrastructure
 
+echo "Pulling Sintr infra"
+
 # Pull the infrasturcture
 gsutil cp gs://$1-sintr-infrastructure/sintr-infrastructure-image.tar.gz .
 tar -xf sintr-infrastructure-image.tar.gz
+
+echo "Running pub get"
+
+find . -type f -name 'pubspec.yaml' \
+  -exec sh -c '(publican=$(dirname {}) && cd $publican && pub upgrade)' \;
+
+echo "Clearing logs"
 
 rm -r ~/sintr-logs
 mkdir -p ~/sintr-logs

@@ -11,6 +11,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:sintr_live_common/configuration.dart' as config;
 import 'package:sintr_live_common/logging_utils.dart' as log;
@@ -30,6 +31,11 @@ const DELAY_BETWEEN_TASK_POLLS = const Duration(seconds: 60);
 main(List<String> args) async {
   log.setupLogging();
   log.debug("Startup args: $args");
+
+  if (args.length != 1) {
+    print ("Usage: Startup cloud_project_id");
+    io.exit(1);
+  }
 
   String projectName = args[0];
 

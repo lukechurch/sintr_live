@@ -40,9 +40,9 @@ Future<String> eval(Map<String, String> source, String message) async {
   log.trace("about to _prepareSetup (eval: ${sw.elapsedMilliseconds}ms)", 1);
   _prepareSetup();
   log.trace("_prepareSetup done, about to _installSource (eval: ${sw.elapsedMilliseconds}ms)", 1);
-  _installSource(source);
+  await _installSource(source);
   log.trace("_installSource done, about to _resetWorker (eval: ${sw.elapsedMilliseconds}ms)", 1);
-  _resetWorker("Always reset policy");
+  await _resetWorker("Always reset policy");
   log.trace("_resetWorker done, about to _resetWorker (eval: ${sw.elapsedMilliseconds}ms)", 1);
   await _setupIsolate(path.join(workingPath, ISOLATE_STARTUP_NAME));
 
@@ -63,7 +63,7 @@ _prepareSetup() {
   if (!workingDirectory.existsSync()) workingDirectory.createSync(recursive: true);
 }
 
-_installSource(Map<String, String> source) {
+_installSource(Map<String, String> source) async {
   String sha = src_utils.computeCodeSha(source);
   if (_installedSourceSha == sha) {
     log.trace("Sha match, no source changes: $sha");
@@ -91,7 +91,10 @@ _installSource(Map<String, String> source) {
 
     log.trace("Writing: ${fileObj.path}");
     // Ensure that the folder structures are in place
+    // await fileObj.create(recursive: true);
     fileObj.createSync(recursive: true);
+
+    // await fileObj.writeAsString(source[sourceName]);
     fileObj.writeAsStringSync(source[sourceName]);
   }
 
@@ -99,7 +102,7 @@ _installSource(Map<String, String> source) {
   String startupLocation = path.join(workingPath, ISOLATE_STARTUP_NAME);
   new File(startupLocation).writeAsStringSync(ISOLATE_MAIN_CODE);
 
-  if (pubspecPathsToUpdate.length > 0) _pubUpdate(pubspecPathsToUpdate);
+  if (pubspecPathsToUpdate.length > 0) await _pubUpdate(pubspecPathsToUpdate);
 }
 
 _pubUpdate(List<String> pubspecPathsToUpdate) async {

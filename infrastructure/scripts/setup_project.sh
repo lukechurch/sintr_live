@@ -34,3 +34,7 @@ set -e
 
 # Deploy the crypto keys
 gsutil cp ~/Communications/CryptoTokens/$1.json gs://$1-sintr-crypto-tokens
+
+# Setup the needed indecies 
+gcloud --quiet preview --project $1 \
+  datastore create-indexes infrastructure/index.yaml

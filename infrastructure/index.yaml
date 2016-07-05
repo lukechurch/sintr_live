@@ -1,0 +1,13 @@
+indexes:
+- kind: _TaskModel
+  properties:
+  - name: lifecycleState
+  - name: creationEpochMs
+    direction: desc
+
+- kind: _TaskModel
+  properties:
+  - name: lifecycleState
+  - name: parentJobName
+  - name: creationEpochMs
+    direction: desc

@@ -2,13 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-// This is the entry point that is called by the worker nodes.
-// If it returns it will be recalled again after a short delay by
-// the infrastructure.
-
-// It should ensure that it periodically writes progress reports to the
-// console, about once a minute
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;

@@ -100,7 +100,8 @@ _handleRequest(io.HttpRequest request) async {
         case "severExec":
           Map<String, String> sources = json["sources"];
           List<String> input = json["input"];
-          String response = await _serverExecuteMap(input, sources);
+          String jobName = json["jobName"];
+          String response = await _serverExecuteMap(input, sources, jobName);
           request.response.write(response);
           break;
 
@@ -127,9 +128,15 @@ Future<String> _localExecuteMap(String msg, Map<String, String> sources) async {
 }
 
 /// Map returning the task name that's associated with the map operation
-Future<String> _serverExecuteMap(List<String> msg, Map<String, String> sources) async {
-  log.trace("_serverExecuteMap: $msg");
-  return new Future.value("Implement me");
+Future<String> _serverExecuteMap(
+  List<String> msgs,
+  Map<String, String> sources,
+  String jobName) async {
+  log.trace("_serverExecuteMap: $msgs");
+
+  tasks.TaskController taskController = new tasks.TaskController(jobName);
+  await taskController.createTasks(msgs, sources);
+  return new Future.value("Tasks created");
 }
 
 Future _setWorkerNodeCount(int count) async {

@@ -44,7 +44,7 @@ Future<List<String>> getNodes(String projectID, String zone) async {
       '--project', projectID]);
 
   var resultString = results.stdout;
-  var resultErr = results.stderr;
+  // var resultErr = results.stderr;
 
   List resultsDataJson = JSON.decode(resultString);
   return resultsDataJson.map((f) => f["name"]).toList();

@@ -24,6 +24,12 @@ import 'package:gcloud/service_scope.dart' as ss;
 
 const JOB_NAME = "sintr-live-interactive-job";
 
+/*
+ * This starts a general purpose front end server that can handle
+ * local evaluation, remote evaluation, and querying properties of the
+ * infrastructure
+ */
+
 String projectId;
 
 main(List<String> args) async {
@@ -65,7 +71,7 @@ main(List<String> args) async {
 }
 
 _handleRequest(io.HttpRequest request) async {
-  Stopwatch sw = new Stopwatch()..start();
+  // Stopwatch sw = new Stopwatch()..start();
 
   log.trace("_handleRequest: $request");
   if (request.uri.pathSegments.length == 0) {

@@ -42,7 +42,7 @@ while true; do
 
   # startup.dart project_name job_name worker_folder
   # dart -c ~bin/startup.dart liftoff-dev $JOB_NAME $(readlink -f ~/src/sintr/job_code)/ > ../$INSTANCE_ID-$NOW.log 2>&1 & ./watchdog.sh 300 ../$INSTANCE_ID-$NOW.log $!
-  dart -c ~/sintr-local-instrastructure/infrastructure/bin/local_server_startup.dart $1 8989 > ~/sintr-logs/$INSTANCE_ID-$NOW.log 2>&1 > \
+  dart -c ~/sintr-local-instrastructure/infrastructure/bin/local_worker_server_startup.dart $1 8989 > ~/sintr-logs/$INSTANCE_ID-$NOW.log 2>&1 > \
     ~/sintr-logs/$INSTANCE_ID-$NOW.log
 
   # Upload the logs

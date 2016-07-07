@@ -2,14 +2,12 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:sintr_live_common/configuration.dart' as config;
 import 'package:sintr_live_common/logging_utils.dart' as log;
 import 'package:sintr_live_common/auth.dart' as auth;
-import 'package:sintr_live_common/tasks.dart' as tasks;
 import 'package:sintr_live_infrastructure/evaluator.dart' as eval;
 
 
@@ -20,6 +18,11 @@ import 'package:gcloud/service_scope.dart' as ss;
 
 const JOB_NAME = "sintr-live-interactive-job";
 const DELAY_BETWEEN_TASK_POLLS = const Duration(seconds: 60);
+
+/*
+ * This starts a server that accepts HTTP requests and executes the
+ * source it is passed
+ */
 
 main(List<String> args) async {
   log.setupLogging();

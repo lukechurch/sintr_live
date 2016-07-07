@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:sintr_live_infrastructure/evaluator.dart' as eval;
-import 'package:sintr_live_common/task_utils.dart' as task_util;
 import 'package:sintr_live_common/tasks.dart' as tasks;
 import 'package:sintr_live_common/configuration.dart' as config;
 import 'package:sintr_live_common/auth.dart';
@@ -9,7 +7,7 @@ import 'package:sintr_live_common/auth.dart';
 import 'package:gcloud/db.dart' as db;
 import 'package:gcloud/service_scope.dart' as ss;
 import 'package:gcloud/src/datastore_impl.dart' as datastore_impl;
-import 'package:gcloud/storage.dart' as storage;
+// import 'package:gcloud/storage.dart' as storage;
 
 import 'package:sintr_live_common/logging_utils.dart' as logging;
 
@@ -34,7 +32,7 @@ main(List<String> args) async {
   var client = await getAuthedClient();
   var datastore = new datastore_impl.DatastoreImpl(client, 's~$projectId');
   var datastoreDB = new db.DatastoreDB(datastore);
-  var cloudstore = new storage.Storage(client, projectId);
+  // var cloudstore = new storage.Storage(client, projectId);
 
   logging.trace("Setup done");
 

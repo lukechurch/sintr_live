@@ -6,6 +6,11 @@ import 'package:sintr_live_common/logging_utils.dart' as logging;
 
 // Run this from the root of the sintr_live checkout
 
+/*
+ * This code sends a series of HTTP requests containing source and messages
+ * to a local execution server
+ */
+
 String JOB_NAME = "sintr-interactive";
 
 int port;

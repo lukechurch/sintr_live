@@ -5,7 +5,6 @@
 // This tool displays the task objects status project's datastore
 
 import 'dart:io';
-import 'dart:async';
 
 import 'package:sintr_live_common/configuration.dart' as config;
 import 'package:sintr_live_common/logging_utils.dart' as log;
@@ -48,7 +47,7 @@ main(List<String> args) async {
       var results = status[job].keys.map((k) => "${tasks.LifecycleState.values[k]}: ${status[job][k]}");
       log.info("$job: ${status[job]} ${results.join(" ")}");
 
-      var readyCount = status[job][tasks.LifecycleState.READY.index];
+      // var readyCount = status[job][tasks.LifecycleState.READY.index];
     }
   });
 }

@@ -10,7 +10,6 @@
 // console, about once a minute
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:sintr_live_common/configuration.dart' as config;

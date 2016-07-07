@@ -5,7 +5,6 @@
 // This tool cleans task objects from the project's datastore
 
 import 'dart:io';
-import 'dart:async';
 
 import 'package:sintr_live_common/configuration.dart' as config;
 import 'package:sintr_live_common/logging_utils.dart' as log;

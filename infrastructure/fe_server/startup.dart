@@ -103,6 +103,13 @@ _handleRequest(io.HttpRequest request) async {
           request.response.write(response);
           break;
 
+        case "localReducer":
+          Map<String, String> sources = json["sources"];
+          String input = json["input"];
+          String response = await _localExecuteReducer(input, sources);
+          request.response.write(response);
+          break;
+
         case "severExec":
           Map<String, String> sources = json["sources"];
           List<String> input = json["input"];
@@ -129,6 +136,12 @@ _handleRequest(io.HttpRequest request) async {
 /// Local execution of a map operation, returning the result
 Future<String> _localExecuteMap(String msg, Map<String, String> sources) async {
   log.trace("_localExecuteMap: $msg");
+  String response = await eval.eval(sources, msg);
+  return new Future.value(response);
+}
+
+Future<String> _localExecuteReducer(String msg, Map<String, String> sources) async {
+  log.trace("_localExecuteReducer: $msg");
   String response = await eval.eval(sources, msg);
   return new Future.value(response);
 }

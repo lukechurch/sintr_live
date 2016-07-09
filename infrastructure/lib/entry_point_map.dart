@@ -11,7 +11,7 @@ import 'dart:convert';
 import 'dart:io';
 
 Future<String> sintrEntryPoint(String msg) async {
-  String text = new File(msg).readAsStringSync();
+  String text = msg;
 
   List<String> words = text.split(" ");
   List<Map<String, int>> kvs = [];

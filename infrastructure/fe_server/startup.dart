@@ -118,6 +118,12 @@ _handleRequest(io.HttpRequest request) async {
           request.response.write(response);
           break;
 
+        case "getResults":
+          String jobName = json["jobName"];
+          List<String> responses = await _getResults(jobName);
+          request.response.write(JSON.encode(responses));
+          break;
+
         case "setNodeCount":
           int count = json["count"];
           String response = await _setWorkerNodeCount(count);
@@ -156,6 +162,13 @@ Future<String> _serverExecuteMap(
   tasks.TaskController taskController = new tasks.TaskController(jobName);
   await taskController.createTasks(msgs, sources);
   return new Future.value("Tasks created");
+}
+
+Future<List<String>> _getResults(String jobName) {
+  log.trace("_getResults: $jobName");
+
+  tasks.TaskController taskController = new tasks.TaskController(jobName);
+  return taskController.queryResultsForJob();
 }
 
 Future _setWorkerNodeCount(int count) async {

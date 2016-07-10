@@ -8,7 +8,7 @@
 # This version executes without a cloud project
 
 # It results in:
-# The Sintr Front End Server running on port 8989
+# The Sintr Front End Server running on port 8990
 
 
 if [ "$#" -ne 0 ]; then
@@ -16,4 +16,15 @@ if [ "$#" -ne 0 ]; then
     exit 1
 fi
 
-./infrastructure/scripts/start_fe_server.sh -
+# Shutdown any existing processes
+kill $(lsof -t -i:8080)   # pub serve
+kill $(lsof -t -i:11001)  # sintr-server-mock
+kill $(lsof -t -i:8990)   # sintr fe
+
+mkdir -p ~/sintr-logs
+
+# Front End Server
+./infrastructure/scripts/start_fe_server.sh - &> ~/sintr-logs/fe_server.log &
+dart ui/sintr-server-mock/server.dart &> ~/sintr-logs/sintr-mock-server.log &
+cd ui
+pub serve &> ~/sintr-logs/ui-pub-serve.log &

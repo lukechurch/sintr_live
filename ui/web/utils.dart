@@ -130,7 +130,7 @@ DivElement newEmptyPanel({String id, Map<String, String> style, bool withResizeC
           ..allowInlineStyles());
 }
 
-int maxDistanceInPx = 5;
+int maxDistanceInPx = 20;
 prepareSnapToOtherPanels(DivElement panel) {
   for (DivElement other in connections.keys) {
     other.style.border = '';

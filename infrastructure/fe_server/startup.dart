@@ -31,6 +31,7 @@ const JOB_NAME = "sintr-live-interactive-job";
  */
 
 String projectId;
+bool noCloudProject = false;
 
 main(List<String> args) async {
   log.setupLogging();
@@ -38,11 +39,25 @@ main(List<String> args) async {
 
   if (args.length != 2) {
     print ("Usage: Startup cloud_project_id port");
+    print ("If you wish to use the fe_server for local usage only");
+    print ("use - for the cloud_project_id");
     io.exit(1);
   }
 
   projectId = args[0];
+  if (projectId.trim() == "-") {
+    log.info("Starting fe_server for local usage only");
+    noCloudProject = true;
+  } else {
+    log.info("Starting fe_server with cloud project $projectId");
+  }
   int port = int.parse(args[1]);
+
+  // Local only startup
+  if (noCloudProject) {
+    _serverStartup(port);
+    return;
+  }
 
   // Setup cloud wrappers
   config.configuration = new config.Configuration(projectId,
@@ -58,16 +73,20 @@ main(List<String> args) async {
     storage.registerStorageService(sourceStorage);
     db.registerDbService(dbService);
 
-    var requestServer =
-        await io.HttpServer.bind(io.InternetAddress.LOOPBACK_IP_V4, port);
-    log.info('listening on localhost, port ${requestServer.port}');
-
-    // Actually handle HTTP requests
-
-    await for (io.HttpRequest request in requestServer) {
-      await _handleRequest(request);
-    }
+    await _serverStartup(port);
   });
+}
+
+_serverStartup(int port) async {
+  var requestServer =
+      await io.HttpServer.bind(io.InternetAddress.LOOPBACK_IP_V4, port);
+  log.info('listening on localhost, port ${requestServer.port}');
+
+  // Actually handle HTTP requests
+
+  await for (io.HttpRequest request in requestServer) {
+    await _handleRequest(request);
+  }
 }
 
 _handleRequest(io.HttpRequest request) async {
@@ -83,59 +102,64 @@ _handleRequest(io.HttpRequest request) async {
   String lastSegment = request.uri.pathSegments.last;
   log.trace("_handleRequest, lastSegment: $lastSegment");
 
-  if (request.method.toLowerCase() == "get") {
-    switch (lastSegment) {
-      case "taskStats":
-        request.response.write(await _getTaskStatus());
-        break;
-      default:
-        request.response.statusCode = 404;
-      }
-    } else {
-      var requestString = await request.transform(UTF8.decoder).join();
-      var json = JSON.decode(requestString);
-
+  try {
+    if (request.method.toLowerCase() == "get") {
       switch (lastSegment) {
-        case "localExec":
-          Map<String, String> sources = json["sources"];
-          String input = json["input"];
-          String response = await _localExecuteMap(input, sources);
-          request.response.write(response);
-          break;
-
-        case "localReducer":
-          Map<String, String> sources = json["sources"];
-          String input = json["input"];
-          String response = await _localExecuteReducer(input, sources);
-          request.response.write(response);
-          break;
-
-        case "severExec":
-          Map<String, String> sources = json["sources"];
-          List<String> input = json["input"];
-          String jobName = json["jobName"];
-          String response = await _serverExecuteMap(input, sources, jobName);
-          request.response.write(response);
-          break;
-
-        case "getResults":
-          String jobName = json["jobName"];
-          List<String> responses = await _getResults(jobName);
-          request.response.write(JSON.encode(responses));
-          break;
-
-        case "setNodeCount":
-          int count = json["count"];
-          String response = await _setWorkerNodeCount(count);
-          request.response.write(response);
-          break;
         case "taskStats":
           request.response.write(await _getTaskStatus());
           break;
         default:
           request.response.statusCode = 404;
+        }
+      } else {
+        var requestString = await request.transform(UTF8.decoder).join();
+        var json = JSON.decode(requestString);
+
+        switch (lastSegment) {
+          case "localExec":
+            Map<String, String> sources = json["sources"];
+            String input = json["input"];
+            String response = await _localExecuteMap(input, sources);
+            request.response.write(response);
+            break;
+
+          case "localReducer":
+            Map<String, String> sources = json["sources"];
+            String input = json["input"];
+            String response = await _localExecuteReducer(input, sources);
+            request.response.write(response);
+            break;
+
+          case "severExec":
+            Map<String, String> sources = json["sources"];
+            List<String> input = json["input"];
+            String jobName = json["jobName"];
+            String response = await _serverExecuteMap(input, sources, jobName);
+            request.response.write(response);
+            break;
+
+          case "getResults":
+            String jobName = json["jobName"];
+            List<String> responses = await _getResults(jobName);
+            request.response.write(JSON.encode(responses));
+            break;
+
+          case "setNodeCount":
+            int count = json["count"];
+            String response = await _setWorkerNodeCount(count);
+            request.response.write(response);
+            break;
+          case "taskStats":
+            request.response.write(await _getTaskStatus());
+            break;
+          default:
+            request.response.statusCode = 404;
+        }
       }
-    }
+  } catch (e, st) {
+    request.response.statusCode = 500;
+    request.response.writeln('$e \n $st');
+  }
   await request.response.close();
 }
 
@@ -159,6 +183,11 @@ Future<String> _serverExecuteMap(
   String jobName) async {
   log.trace("_serverExecuteMap: $msgs");
 
+  if (noCloudProject) {
+    log.alert("No Cloud project configured, remote execution unavailable");
+    throw "No cloud project";
+  }
+
   tasks.TaskController taskController = new tasks.TaskController(jobName);
   await taskController.createTasks(msgs, sources);
   return new Future.value("Tasks created");
@@ -167,18 +196,35 @@ Future<String> _serverExecuteMap(
 Future<List<String>> _getResults(String jobName) {
   log.trace("_getResults: $jobName");
 
+  if (noCloudProject) {
+    log.alert("No Cloud project configured, get results unavailable");
+    throw "No cloud project";
+  }
+
   tasks.TaskController taskController = new tasks.TaskController(jobName);
   return taskController.queryResultsForJob();
 }
 
 Future _setWorkerNodeCount(int count) async {
   log.trace("_setWorkerNodeCount: $count");
+
+  if (noCloudProject) {
+    log.alert("No Cloud project configured, _setWorkerNodeCount unavailable");
+    throw "No cloud project";
+  }
+
   worker_utils.setWorkerCount(projectId, count);
   return new Future.value("Node count set");
 }
 
 Future<String> _getTaskStatus() async {
   log.trace("_getTaskStatus");
+
+  if (noCloudProject) {
+    log.alert("No Cloud project configured, _getTaskStatus unavailable");
+    throw "No cloud project";
+  }
+
   tasks.TaskController taskController =
       new tasks.TaskController("example_task");
   var taskState = await taskController.queryTaskState();

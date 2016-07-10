@@ -232,17 +232,88 @@ void main() {
   // Add listener to the FAB for adding new code windows
   querySelector('#add-nodule').onClick.listen((_) => addNewCodeEditor());
 
+  // Set callbacks for server API calls.
+  querySelector('#localExec').onClick.listen((MouseEvent event) {
+    var url = '$dartServicesURL/localExec';
+    Map<String, String> sources = collectCodeSources();
+    String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input": input,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..send(JSON.encode(message));
+  });
+
+  querySelector('#localReducer').onClick.listen((MouseEvent event) {
+    var url = '$dartServicesURL/localReducer';
+    Map<String, String> sources = collectCodeSources();
+    String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input": input,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..send(JSON.encode(message));
+  });
+
+  querySelector('#serverExec').onClick.listen((MouseEvent event) {
+    var url = '$dartServicesURL/serverExec';
+    Map<String, String> sources = collectCodeSources();
+    String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input": [input],
+      "jobName": jobName,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..send(JSON.encode(message));
+  });
+
+  querySelector('#getResults').onClick.listen((MouseEvent event) {
+    var url = '$dartServicesURL/getResults';
+    String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    Map<String, dynamic> message = {
+      "jobName": jobName,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..send(JSON.encode(message));
+  });
+
+  querySelector('#taskStats').onClick.listen((MouseEvent event) {
+    var url = '$dartServicesURL/taskStats';
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..send(JSON.encode('taskStats'));
+  });
+
   // Add listener for the node count update
   querySelector('#set-node-count-button').onClick.listen((_) {
     String textfieldValue = "";
     try {
       textfieldValue = (querySelector('#node-count-textfield') as InputElement).value;
       int nodeCount = int.parse(textfieldValue);
-      new HttpRequest()
+      var httpRequest = new HttpRequest();
+      httpRequest
         ..open("POST", "$dartServicesURL/$setNodeCountPath")
         ..onLoad.listen((event) {
-          print(event.target.responseText);
-          snackbar(event.target.responseText).show();
+          logResponseInOutputPanel(httpRequest);
+          snackbar(httpRequest.responseText).show();
         })
         ..send(JSON.encode({'count': nodeCount}));
     } catch (e) {
@@ -255,6 +326,25 @@ void main() {
 
   // Get the sample input from the server and display it in the UI.
   getSampleInput();
+}
+
+Map<String, String> collectCodeSources() {
+  Map<String, String> sources = {};
+  editors.forEach((DivElement codePanel, Editor editor) {
+    String title = codePanel.querySelector('.panel-title').text;
+    String filename = title.endsWith('.dart') ? title : '$title.dart';
+    String code = editor.document.value;
+    sources[filename] = code;
+  });
+  return sources;
+}
+
+logResponseInOutputPanel(HttpRequest request) {
+  if (request.status == 200) {
+    querySelector('#raw-output').querySelector('.card-contents').text = request.responseText;
+  } else {
+    querySelector('#raw-output').querySelector('.card-contents').text = 'Request failed, status=${request.status}';
+  }
 }
 
 addNewCodeEditor({String filename: 'default.dart', String code: ''}) {

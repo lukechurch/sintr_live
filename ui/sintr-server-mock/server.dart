@@ -130,23 +130,59 @@ handlePost(HttpRequest req) {
   addCorsHeaders(res);
 
   req.listen((List<int> buffer) {
-    if (req.uri.path == "/runCode") {
-      // Pretend to run the code...
+    String requestString = UTF8.decode(buffer);
+    var json = JSON.decode(requestString);
+    switch (req.uri.path) {
+      case "/runCode":
+        // Pretend to run the code...
 
-      // Re-initialize the response data
-      responsePart = 0;
-      taskDone = false;
+        // Re-initialize the response data
+        responsePart = 0;
+        taskDone = false;
 
-      // Reply and say that it's all good.
-      res.add(UTF8.encode("OK"));
-      res.close();
-    } else if  (req.uri.path == "/setNodeCount") {
-      String requestString = UTF8.decode(buffer);
-      var json = JSON.decode(requestString);
-      int count = json["count"];
-      String response = count == 1000 ? "Node count set" : "Unable to set node count";
-      res.write(response);
-      res.close();
+        // Reply and say that it's all good.
+        res.add(UTF8.encode("OK"));
+        res.close();
+        break;
+      case "/setNodeCount":
+        String requestString = UTF8.decode(buffer);
+        var json = JSON.decode(requestString);
+        int count = json["count"];
+        String response = count == 1000 ? "Node count set" : "Unable to set node count";
+        res.write(response);
+        res.close();
+        break;
+      case "/localExec":
+        String response = "localExec: Received ${json['sources'].length} source files to analyse.";
+        res.write(response);
+        res.close();
+        break;
+      case "/localReducer":
+        String response = "localReducer: Received ${json['sources'].length} source files to analyse.";
+        res.write(response);
+        res.close();
+        break;
+      case "/serverExec":
+        Map<String, String> sources = json["sources"];
+        List<String> input = json["input"];
+        String jobName = json["jobName"];
+        String response = "serverExec: Received ${sources.length} source files and ${input.length} inputs to analyse .";
+        res.write(response);
+        res.close();
+        break;
+      case "/getResults":
+        String jobName = json["jobName"];
+        String response = "getResults: Received job ${jobName}.";
+        res.write(response);
+        res.close();
+        break;
+      case "/taskStats":
+        res.write("taskStats request received");
+        res.close();
+        break;
+      default:
+        res.statusCode = 404;
+        res.close();
     }
   }, onError: printError);
 }

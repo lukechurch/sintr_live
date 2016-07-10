@@ -74,23 +74,28 @@ BSD-style license that can be found in the LICENSE file.
         <div style="margin: 0 auto;"></div>
 
         <!-- Some buttons to expose server API -->
-        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+        <button id="localExec" class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
           localExec
         </button>
 
-        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+        <button id="localReducer" class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
           localReducer
         </button>
 
-        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
-          severExec
+        <div class="mdl-textfield mdl-js-textfield" style="width: 128px;">
+            <input id="server-job-name-textfield" class="mdl-textfield__input" type="text" value="default-job-name">
+            <label class="mdl-textfield__label" for="node-count-textfield">Enter the name of the job to be run on the server</label>
+        </div>
+
+        <button id="serverExec" class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          serverExec
         </button>
 
-        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+        <button id="getResults" class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
           getResults
         </button>
 
-        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+        <button id="taskStats" class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
           taskStats
         </button>
 

@@ -136,6 +136,11 @@ prepareSnapToOtherPanels(DivElement panel) {
     other.style.border = '';
     panel.style.border = '';
     String borderStyle = '2px solid #ff5252';
+    // Only try to snap to panels which intersect this panel vertically
+    if ((other.borderEdge.left < panel.borderEdge.left && other.borderEdge.right < panel.borderEdge.left) ||
+        (other.borderEdge.left > panel.borderEdge.right && other.borderEdge.right > panel.borderEdge.right)) {
+      continue;
+    }
     // Only try to snap borders which are not connected yet.
     if (!panel.classes.contains('connected-border--bottom') &&
         !other.classes.contains('connected-border--top') &&
@@ -159,6 +164,11 @@ handleSnapToOtherPanels(DivElement panel, {bool useHeightInsteadOfTop: false}) {
     other.style.border = '';
     panel.style.border = '';
     Neighbours otherNeighbours = connections[other];
+    // Only try to snap to panels which intersect this panel vertically
+    if ((other.borderEdge.left < panel.borderEdge.left && other.borderEdge.right < panel.borderEdge.left) ||
+        (other.borderEdge.left > panel.borderEdge.right && other.borderEdge.right > panel.borderEdge.right)) {
+      continue;
+    }
     // Only try to snap borders which are not connected yet.
     if (!panel.classes.contains('connected-border--bottom') &&
         !other.classes.contains('connected-border--top') &&

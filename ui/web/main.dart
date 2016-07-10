@@ -175,6 +175,22 @@ void main() {
   nodesStatus = querySelector('#nodes-status');
   tasksStatus = querySelector('#tasks-status');
 
+  // Initialize the neighbours of the elements of the UI.
+  connections[rawInput] = new Neighbours();
+  connections[rawOutput] = new Neighbours();
+  connections[outputHistogram] = new Neighbours();
+  connections[errorsOutput] = new Neighbours();
+  connections[nodesStatus] = new Neighbours();
+  connections[tasksStatus] = new Neighbours();
+
+  // Attach listeners for the title bar buttons.
+  attachTitleBarButtonsListeners(rawInput);
+  attachTitleBarButtonsListeners(rawOutput);
+  attachTitleBarButtonsListeners(outputHistogram);
+  attachTitleBarButtonsListeners(errorsOutput);
+  attachTitleBarButtonsListeners(nodesStatus);
+  attachTitleBarButtonsListeners(tasksStatus);
+
   // Set the order in which things are displayed on the screen.
   // This matches initially with the order in the DOM.
   zOrderedElements = [rawInput, rawOutput, outputHistogram, errorsOutput, nodesStatus, tasksStatus];
@@ -268,54 +284,55 @@ Editor createNewEditor(DivElement editorContainer) {
 }
 
 attachTitleBarButtonsListeners(DivElement e) {
-    ButtonElement closeButton = e.querySelector('.icon--close');
-    if (closeButton != null) {
-      closeButton.onClick.listen((MouseEvent event) {
-        removeParentConnections(e);
-        removeChildrenConnections(e);
-        connections.remove(e);
-        e.remove();
-        editors.remove(e);
-      });
-    }
+  ButtonElement closeButton = e.querySelector('.icon--close');
+  if (closeButton != null) {
+    closeButton.onClick.listen((MouseEvent event) {
+      removeParentConnections(e);
+      removeChildrenConnections(e);
+      connections.remove(e);
+      e.remove();
+      editors.remove(e);
+    });
+  }
 
-    ButtonElement foldButton = e.querySelector('.icon--fold-unfold');
-    if (foldButton != null) {
-      foldButton.onClick.listen((MouseEvent event) {
-        if (foldButton.innerHtml.contains('unfold_less')) {
-          // First save the previous height & mark the height as unchangeable
-          // (until the unfold button is pressed again).
-          e.attributes['original_height'] = e.style.height;
-          e.attributes['fixed-height'] = "";
-          // Set the transition
-          // e.style.transition = 'height 5s';
-          // e.onTransitionEnd.first.then((_) => e.style.transition = '');
-          e.style.height = '16px';
-          // Propagate the change to the children neighbours.
-          int heightDiff = 16 - pxValueToInt(e.attributes['original_height']);
-          propagateFoldToChildren(e, heightDiff);
-          // Replace the button
-          foldButton.querySelector('i').text = 'unfold_more';
-          componentHandler().upgradeElement(foldButton);
-        } else if (foldButton.innerHtml.contains('unfold_more')) {
-          // Set the transition
-          // e.style.transition = 'height 5s';
-          // e.onTransitionEnd.first.then((_) => e.style.transition = '');
-          e.style.height = e.attributes['original_height'];
-          // Propagate the change to the children neighbours.
-          int heightDiff = pxValueToInt(e.attributes['original_height']) - 16;
-          propagateFoldToChildren(e, heightDiff);
-          // Remove the height limitations
-          e.attributes.remove('original_height');
-          e.attributes.remove('fixed-height');
-          //Replace the button
-          foldButton.querySelector('i').text = 'unfold_less';
-          componentHandler().upgradeElement(foldButton);
-        }
-      });
-    }
+  ButtonElement foldButton = e.querySelector('.icon--fold-unfold');
+  if (foldButton != null) {
+    foldButton.onClick.listen((MouseEvent event) {
+      if (foldButton.innerHtml.contains('unfold_less')) {
+        // First save the previous height & mark the height as unchangeable
+        // (until the unfold button is pressed again).
+        e.attributes['original_height'] = e.style.height;
+        e.attributes['fixed-height'] = "";
+        // Set the transition
+        // e.style.transition = 'height 5s';
+        // e.onTransitionEnd.first.then((_) => e.style.transition = '');
+        e.style.height = '16px';
+        // Propagate the change to the children neighbours.
+        int heightDiff = 16 - pxValueToInt(e.attributes['original_height']);
+        propagateFoldToChildren(e, heightDiff);
+        // Replace the button
+        foldButton.querySelector('i').text = 'unfold_more';
+        componentHandler().upgradeElement(foldButton);
+      } else if (foldButton.innerHtml.contains('unfold_more')) {
+        // Set the transition
+        // e.style.transition = 'height 5s';
+        // e.onTransitionEnd.first.then((_) => e.style.transition = '');
+        e.style.height = e.attributes['original_height'];
+        // Propagate the change to the children neighbours.
+        int heightDiff = pxValueToInt(e.attributes['original_height']) - 16;
+        propagateFoldToChildren(e, heightDiff);
+        // Remove the height limitations
+        e.attributes.remove('original_height');
+        e.attributes.remove('fixed-height');
+        //Replace the button
+        foldButton.querySelector('i').text = 'unfold_less';
+        componentHandler().upgradeElement(foldButton);
+      }
+    });
+  }
 
-    HeadingElement title = e.querySelector('.panel-title');
+  HeadingElement title = e.querySelector('.panel-title');
+  if (title != null) {
     title.onDoubleClick.listen((Event event) {
       title.contentEditable = 'true';
       title.focus();
@@ -339,6 +356,7 @@ attachTitleBarButtonsListeners(DivElement e) {
         }
       });
     });
+  }
 }
 
 initKeyBindings() {

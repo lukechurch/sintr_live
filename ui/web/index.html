@@ -1,0 +1,182 @@
+<!--
+
+Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Sintr</title>
+
+  <!-- Fonts -->
+  <link rel="stylesheet" href="packages/mdl/assets/fonts/fonts.min.css">
+
+  <!-- codemirror -->
+  <link href="packages/codemirror/codemirror.css" rel="stylesheet">
+  <link href="packages/codemirror/addon/lint/lint.css" rel="stylesheet" media="screen">
+  <link href="packages/codemirror/addon/hint/show-hint.css" rel="stylesheet" media="screen">
+  <link href="packages/codemirror/theme/elegant.css" rel="stylesheet">
+  <link href="packages/sintr_ui/editing/editor_codemirror.css" rel="stylesheet">
+
+  <!-- Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <!-- Styles -->
+  <!-- <link rel="stylesheet" href="packages/mdl/assets/styles/material.min.css"> -->
+  <link rel="stylesheet" href="theme.grey-blue.material.min.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Project files -->
+  <script async src="main.dart" type="application/dart"></script>
+  <script async src="packages/browser/dart.js"></script>
+  <script src="packages/codemirror/codemirror.js"></script>
+</head>
+
+<body>
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <style>
+        .mdl-layout__header {
+            background: white;
+            color: #333333;
+        }
+
+        .header-entry {
+          padding: 0 12px;
+        }
+    </style>
+
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row">
+        <!-- Run button -->
+        <button id="run-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          Run
+        </button>
+
+        <!-- Auto-run selector -->
+        <div class="header-entry" style="width: 36px;">
+          <label id="auto-run-checkbox" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="auto-run-switch" style="padding-left: 0;">
+            <input type="checkbox" id="auto-run-switch" class="mdl-switch__input" value="true">
+          </label>
+          <div class="mdl-tooltip" for="auto-run-checkbox">
+          Auto-run
+          </div>
+        </div>
+
+        <!-- A separator to move what's after this to the right -->
+        <div style="margin: 0 auto;"></div>
+
+        <!-- Some buttons to expose server API -->
+        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          localExec
+        </button>
+
+        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          localReducer
+        </button>
+
+        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          severExec
+        </button>
+
+        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          getResults
+        </button>
+
+        <button class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+          taskStats
+        </button>
+
+        <!-- A separator to move what's after this to the right -->
+        <div style="margin: 0 auto;"></div>
+
+        <!-- Number of nodes selector -->
+        <div class="header-entry">
+          <div class="mdl-textfield mdl-js-textfield" style="width: 64px;">
+              <input id="node-count-textfield" class="mdl-textfield__input" type="text" pattern="[0-9]*" value="100">
+              <label class="mdl-textfield__label" for="node-count-textfield">Enter number of nodes</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+          </div>
+          <button id="set-node-count-button" class="mdl-button mdl-js-button">
+            Set node count
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+
+    <main class="mdl-layout__content">
+
+      <div id="raw-input" style="width: 450px; height: 400px; left: 30px; top: 30px;" class="mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <h1 class="panel-title">Sample input</h1>
+
+        <!-- TODO(mariana): Remove contenteditable="true" once the input format is from files -->
+        <div class="card-contents" contenteditable="true"></div>
+      </div>
+
+      <div id="raw-output" style="width: 650px; height: 400px; right: 30px; top: 30px;" class="mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <h1 class="panel-title">Output</h1>
+        <div class="card-contents"></div>
+      </div>
+
+      <div id="output-histogram" style="width: 650px; height: 300px; top: 492px; right: 30px;" class="mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <div class='areaChart' style="display: inline-block; width: 72%; height: 100%;"></div>
+        <div class='pieChart' style="display: inline-block; width: 22%; height: 100%;"></div>
+      </div>
+
+      <div id="errors-output" style=" width: 604px; height: 300px; left: 542px; top: 492px;" class="mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <h1 class="panel-title">Errors</h1>
+        <div class="card-contents"></div>
+      </div>
+
+      <div id="nodes-status" style="width: 450px; height: 96px; left: 30px; bottom: 145px" class="mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <h1 class="panel-title">Sintr nodes status</h1>
+        <div class='contents' style='width: 100%; height: calc(100% - 32px);'></div>
+      </div>
+
+      <div id="tasks-status" style="width: 450px; height: 96px; left: 30px; bottom: 30px" class="mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <h1 class="panel-title">Compute tasks status</h1>
+        <div class='contents' style='width: 100%; height: calc(100% - 32px);'></div>
+      </div>
+
+      <button id="add-nodule" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--accent">
+        <i class="material-icons">add</i>
+      </button>
+
+    </main>
+  </div>
+
+</body>
+</html>

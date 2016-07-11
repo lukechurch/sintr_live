@@ -330,8 +330,7 @@ void main() {
 Map<String, String> collectCodeSources() {
   Map<String, String> sources = {};
   editors.forEach((DivElement codePanel, Editor editor) {
-    String title = codePanel.querySelector('.panel-title').text;
-    String filename = title.endsWith('.dart') ? title : '$title.dart';
+    String filename = codePanel.querySelector('.panel-title').text;
     String code = editor.document.value;
     sources[filename] = code;
   });

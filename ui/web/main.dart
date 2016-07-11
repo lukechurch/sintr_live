@@ -131,8 +131,12 @@ void getSampleInput() {
   // Make the request to get the sample input.
   var url = '$dartServicesURL/sampleInput';
   HttpRequest.getString(url).then((String sampleInput) {
-    rawInput.querySelector('.card-contents').innerHtml =
-        inputMapStringify(JSON.decode(sampleInput));
+
+    String jsonDecoded = JSON.decode(sampleInput);
+    // rawInput.querySelector('.card-contents').innerHtml =
+    //     inputMapStringify(JSON.decode(sampleInput));
+    rawInput.querySelector('.card-contents').text =
+        "$jsonDecoded";
   });
 }
 
@@ -272,7 +276,7 @@ void main() {
     String input = querySelector('#raw-input').querySelector('.card-contents').text;
     String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
     sources = _selectExecFile(sources, "entry_point_map.dart");
-    
+
     Map<String, dynamic> message = {
       "sources": sources,
       "input": [input],

@@ -125,9 +125,6 @@ _handleRequest(io.HttpRequest request) async {
     request.response.writeln('$e \n $st');
   }
   await request.response.close();
-
-
-
 }
 
 
@@ -155,7 +152,7 @@ _handleGet(io.HttpRequest request) async {
       }
 
       res.add(UTF8.encode(JSON.encode(sources)));
-      res.close();
+      // res.close();
       break;
 
 /*  =======================================
@@ -164,8 +161,18 @@ _handleGet(io.HttpRequest request) async {
 */
 
 case '/sampleInput':
-  res.add(UTF8.encode(JSON.encode(sampleInput)));
-  res.close();
+  var inputDataMap = JSON.decode(new io.File("demo/input.json").readAsStringSync());
+  var inputFileName = inputDataMap["files"].first;
+
+  res.add(
+    UTF8.encode(JSON.encode(
+      new io.File("demo/$inputFileName").readAsStringSync()
+    ))
+  );
+
+
+  // res.add(UTF8.encode(JSON.encode(sampleInput)));
+  // res.close();
   break;
 case '/nodesStatus':
   var nodesStatus = {'ready': 0, 'active': 0};
@@ -386,55 +393,6 @@ void addCorsHeaders(io.HttpResponse res) {
   res.headers.add("Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept");
 }
-
-
-
-// Legacy constants
-
-final SRC = """
-import 'dart:math';
-
-int hogPresenceThreshold = 5.0;
-
-Map<int, bool> map(String filename) {
-  List<List<String>> tokens = await tokenizeFileByLines(filename);
-  Map<int, bool> hogPresence = {};
-  tokens.forEach((line) {
-    var timestamp = int.parse(line[0]);
-    var gx = double.parse(line[1]);
-    var gy = double.parse(line[2]);
-    var gz = double.parse(line[3]);
-    var magnitude = sqrt(gx * gx + gy * gy + gz * gz);
-    if (magnitude > hogPresenceThreshold) {
-      hogPresence[timestamp] = true;
-    } else {
-      hogPresence[timestamp] = false;
-    }
-  });
-  return hogPresence;
-}
-
-Map<bool, int> reduce(Map<int, bool> timestampPresence, Map<bool, int> partialCounts) {
-  timestampPresence.forEach((int timestamp, bool presence) {
-    partialCounts[presence] = partialCounts[presence] + 1;
-  });
-  return partialCounts;
-}
-""";
-
-final PUBSPEC_SRC = """
-name: 'sintr_ui'
-version: 0.0.1
-description: sample
-
-environment:
-  sdk: '>=1.0.0 <2.0.0'
-
-dependencies:
-  uuid: '>=0.5.0 <0.6.0'
-
-""";
-
 
 // Legacy variables
 

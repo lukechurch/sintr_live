@@ -10,6 +10,8 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
 
+import 'package:path/path.dart' as path_lib;
+
 import 'package:sintr_live_common/configuration.dart' as config;
 import 'package:sintr_live_common/logging_utils.dart' as log;
 import 'package:sintr_live_common/auth.dart' as auth;
@@ -137,6 +139,24 @@ _handleGet(io.HttpRequest request) async {
     case "/taskStats":
       res.write(await _getTaskStatus());
       break;
+    case '/sources':
+      Map<String, String> sources = {};
+
+      for (var fse in new io.Directory("demo").listSync()) {
+        if (!(fse is io.File)) continue;
+
+        var name = path_lib.basename(fse.path);
+        var ext = path_lib.extension(fse.path);
+
+        if (ext != ".dart" && ext != ".yaml") continue;
+
+        var source = fse.readAsStringSync();
+        sources[name] = source;
+      }
+
+      res.add(UTF8.encode(JSON.encode(sources)));
+      res.close();
+      break;
 
 /*  =======================================
     LEGACY GET METHODS FROM THE MOCK SERVER
@@ -145,13 +165,6 @@ _handleGet(io.HttpRequest request) async {
 
 case '/sampleInput':
   res.add(UTF8.encode(JSON.encode(sampleInput)));
-  res.close();
-  break;
-case '/sources':
-  Map<String, String> sources = {};
-  sources["pubspec.yaml"] = PUBSPEC_SRC;
-  sources["entry.dart"] = SRC;
-  res.add(UTF8.encode(JSON.encode(sources)));
   res.close();
   break;
 case '/nodesStatus':
@@ -288,12 +301,15 @@ _handlePost(io.HttpRequest request) async {
 /// Local execution of a map operation, returning the result
 Future<String> _localExecuteMap(String msg, Map<String, String> sources) async {
   log.trace("_localExecuteMap: $msg");
+  log.trace("Sources: ${sources.keys.toList()}");
   String response = await eval.eval(sources, msg);
   return new Future.value(response);
 }
 
 Future<String> _localExecuteReducer(String msg, Map<String, String> sources) async {
   log.trace("_localExecuteReducer: $msg");
+  log.trace("Sources: ${sources.keys.toList()}");
+
   String response = await eval.eval(sources, msg);
   return new Future.value(response);
 }
@@ -304,6 +320,8 @@ Future<String> _serverExecuteMap(
   Map<String, String> sources,
   String jobName) async {
   log.trace("_serverExecuteMap: $msgs");
+  log.trace("Sources: ${sources.keys.toList()}");
+
 
   if (noCloudProject) {
     log.alert("No Cloud project configured, remote execution unavailable");

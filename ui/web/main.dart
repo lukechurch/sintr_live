@@ -236,6 +236,8 @@ void main() {
     var url = '$dartServicesURL/localExec';
     Map<String, String> sources = collectCodeSources();
     String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    sources = _selectExecFile(sources, "entry_point_map.dart");
+
     Map<String, dynamic> message = {
       "sources": sources,
       "input": input,
@@ -251,6 +253,8 @@ void main() {
     var url = '$dartServicesURL/localReducer';
     Map<String, String> sources = collectCodeSources();
     String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    sources = _selectExecFile(sources, "entry_point_reducer.dart");
+
     Map<String, dynamic> message = {
       "sources": sources,
       "input": input,
@@ -267,6 +271,8 @@ void main() {
     Map<String, String> sources = collectCodeSources();
     String input = querySelector('#raw-input').querySelector('.card-contents').text;
     String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    sources = _selectExecFile(sources, "entry_point_map.dart");
+    
     Map<String, dynamic> message = {
       "sources": sources,
       "input": [input],
@@ -338,8 +344,8 @@ Map<String, String> collectCodeSources() {
 }
 
 logResponseInOutputPanel(HttpRequest request) {
+  String responseText = request.responseText;
   if (request.status == 200) {
-    String responseText = request.responseText;
     // Try to encode with it a JSON pretty printer
     try {
       JsonEncoder encoder = new JsonEncoder.withIndent("  ");
@@ -351,7 +357,7 @@ logResponseInOutputPanel(HttpRequest request) {
     }
     querySelector('#raw-output').querySelector('.card-contents').innerHtml = "<pre>$responseText</pre>";
   } else {
-    querySelector('#raw-output').querySelector('.card-contents').text = 'Request failed, status=${request.status}';
+    querySelector('#raw-output').querySelector('.card-contents').text = 'Request failed, status=${request.status}\n\n$responseText';
   }
 }
 
@@ -466,3 +472,16 @@ initKeyBindings() {
   keys.bind(['alt-enter', 'ctrl-1'], () {}, "Quick fix");
   keys.bind(['ctrl-space', 'macctrl-space'], () {}, "Completion");
 }
+
+
+/// Rewrite the sources map to select the file to execute
+Map<String, String> _selectExecFile(
+  Map<String, String> sources, String sourceNameToExec) {
+
+    const EXEC_NAME = "entry_point.dart"; // The file that will be run
+
+    sources[EXEC_NAME] = sources[sourceNameToExec];
+    sources.remove(sourceNameToExec);
+
+    return sources;
+  }

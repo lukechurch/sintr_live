@@ -16,15 +16,12 @@ if [ "$#" -ne 0 ]; then
     exit 1
 fi
 
-# Shutdown any existing processes
-kill $(lsof -t -i:8080)   # pub serve
-kill $(lsof -t -i:11001)  # sintr-server-mock
-kill $(lsof -t -i:8990)   # sintr fe
-
 mkdir -p ~/sintr-logs
 
-# Front End Server
-./infrastructure/scripts/start_fe_server.sh - &> ~/sintr-logs/fe_server.log &
-dart ui/sintr-server-mock/server.dart &> ~/sintr-logs/sintr-mock-server.log &
 cd ui
 pub serve &> ~/sintr-logs/ui-pub-serve.log &
+
+cd ..
+
+# Front End Server
+./infrastructure/scripts/start_fe_server.sh - # &> ~/sintr-logs/fe_server.log

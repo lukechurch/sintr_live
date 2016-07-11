@@ -341,7 +341,17 @@ Map<String, String> collectCodeSources() {
 
 logResponseInOutputPanel(HttpRequest request) {
   if (request.status == 200) {
-    querySelector('#raw-output').querySelector('.card-contents').text = request.responseText;
+    String responseText = request.responseText;
+    // Try to encode with it a JSON pretty printer
+    try {
+      JsonEncoder encoder = new JsonEncoder.withIndent("  ");
+      responseText = encoder.convert(JSON.decode(JSON.decode(responseText)['result']));
+    } catch (e, st) {
+      print ("Decoding failed");
+      print (e);
+      print (st);
+    }
+    querySelector('#raw-output').querySelector('.card-contents').innerHtml = "<pre>$responseText</pre>";
   } else {
     querySelector('#raw-output').querySelector('.card-contents').text = 'Request failed, status=${request.status}';
   }

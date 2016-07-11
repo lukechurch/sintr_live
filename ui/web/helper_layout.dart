@@ -61,7 +61,13 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
           resizeElement.classes.contains('top-right')) {
         removeParentConnections(e);
       }
+      int mouseMovementX = 0, mouseMovementY = 0; // For tracking the mouse movement
+      int mouseLastPositionX = event.page.x, mouseLastPositionY = event.page.y; // For tracking the mouse movement
       StreamSubscription mouseMove = document.onMouseMove.listen((MouseEvent event) {
+        mouseMovementX = event.client.x - mouseLastPositionX; // For tracking the mouse movement
+        mouseMovementY = event.client.y - mouseLastPositionY; // For tracking the mouse movement
+        mouseLastPositionX = event.client.x; // For tracking the mouse movement
+        mouseLastPositionY = event.client.y; // For tracking the mouse movement
         borders.forEach((Borders border) {
           bool fixedHeight = e.attributes.containsKey('fixed-height');
           int newWidth = e.contentEdge.width;
@@ -70,28 +76,28 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
           int newTop = e.offset.top;
           switch(border) {
             case Borders.widthPlus:
-              newWidth += event.movement.x;
+              newWidth += mouseMovementX;
               break;
             case Borders.widthMinus:
-              newWidth -= event.movement.x;
+              newWidth -= mouseMovementX;
               break;
             case Borders.heightPlus:
-              newHeight += event.movement.y;
+              newHeight += mouseMovementY;
               break;
             case Borders.heightMinus:
-              newHeight -= event.movement.y;
+              newHeight -= mouseMovementY;
               break;
             case Borders.leftPlus:
-              newLeft += event.movement.x;
+              newLeft += mouseMovementX;
               break;
             case Borders.leftMinus:
-              newLeft -= event.movement.x;
+              newLeft -= mouseMovementX;
               break;
             case Borders.topPlus:
-              newTop += event.movement.y;
+              newTop += mouseMovementY;
               break;
             case Borders.topMinus:
-              newTop -= event.movement.y;
+              newTop -= mouseMovementY;
               break;
           }
           e.style.width = '${newWidth}px';
@@ -103,7 +109,7 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
         if (resizeElement.classes.contains('bottom') ||
             resizeElement.classes.contains('bottom-left') ||
             resizeElement.classes.contains('bottom-right')) {
-          moveChildrenConnections(e, 0, event.movement.y);
+          moveChildrenConnections(e, 0, event.movementY);
         }
       });
 
@@ -130,15 +136,21 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
     event.preventDefault();
     querySelector('body').style.userSelect = 'none';
     removeParentConnections(e);
+    int mouseMovementX = 0, mouseMovementY = 0; // For tracking the mouse movement
+    int mouseLastPositionX = event.page.x, mouseLastPositionY = event.page.y; // For tracking the mouse movement
     StreamSubscription mouseMove = document.onMouseMove.listen((MouseEvent event) {
       event.stopPropagation();
       event.preventDefault();
-      int newLeft = e.offset.left + event.movement.x;
-      int newTop = e.offset.top + event.movement.y;
+      mouseMovementX = event.client.x - mouseLastPositionX; // For tracking the mouse movement
+      mouseMovementY = event.client.y - mouseLastPositionY; // For tracking the mouse movement
+      mouseLastPositionX = event.client.x; // For tracking the mouse movement
+      mouseLastPositionY = event.client.y; // For tracking the mouse movement
+      int newLeft = e.offset.left + mouseMovementX;
+      int newTop = e.offset.top + mouseMovementY;
       e.style.left = '${newLeft}px';
       e.style.top = '${newTop}px';
       prepareSnapToOtherPanels(e);
-      moveChildrenConnections(e, event.movement.x, event.movement.y);
+      moveChildrenConnections(e, mouseMovementX, mouseMovementY);
     });
 
     StreamSubscription mouseUp;

@@ -109,6 +109,7 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
         if (resizeElement.classes.contains('bottom') ||
             resizeElement.classes.contains('bottom-left') ||
             resizeElement.classes.contains('bottom-right')) {
+
           moveChildrenConnections(e, 0, mouseMovementY);
         }
       });

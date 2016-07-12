@@ -26,8 +26,8 @@ BSD-style license that can be found in the LICENSE file.
   <link href="packages/codemirror/theme/elegant.css" rel="stylesheet">
   <link href="packages/sintr_ui/editing/editor_codemirror.css" rel="stylesheet">
 
-  <!-- Google Charts -->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- Plotly charting library -->
+  <script src="packages/plotly/plotly-latest.min.js"></script>
 
   <!-- Styles -->
   <!-- <link rel="stylesheet" href="packages/mdl/assets/styles/material.min.css"> -->
@@ -154,8 +154,15 @@ BSD-style license that can be found in the LICENSE file.
         <div class="title-bar-buttons">
           <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
         </div>
-        <div class='areaChart' style="display: inline-block; width: 72%; height: 100%;"></div>
-        <div class='pieChart' style="display: inline-block; width: 22%; height: 100%;"></div>
+        <div class="card-contents">
+          <select class="type-menu" name="type-menu">
+            <option value="scatter">Scatter plot</option>
+            <option value="bar">Bar chart</option>
+          </select>
+          <select class="x-axis-menu" name="x-axis-menu"></select>
+          <select class="y-axis-menu" name="y-axis-menu"></select>
+          <div class="chart-container"></div>
+        </div>
       </div>
 
       <div id="errors-output" style=" width: 604px; height: 300px; left: 542px; top: 492px;" class="mdl-panel mdl-panel--shadow">

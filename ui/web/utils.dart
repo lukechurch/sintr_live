@@ -228,8 +228,6 @@ removeChildrenConnections(DivElement panel) {
   panel.classes.remove('connected-border--bottom');
 }
 
-// TODO(mariana): Maintain snapping on resize.
-
 moveChildrenConnections(DivElement panel, int movementX, int movementY) {
   Neighbours panelNeighbours = connections[panel];
   if (panelNeighbours == null || panelNeighbours.bottom == null) {
@@ -251,4 +249,96 @@ propagateFoldToChildren(DivElement panel, int heightDiff) {
   // bottomPanel.onTransitionEnd.listen((_) => bottomPanel.style.transition = '');
   bottomPanel.style.top = '${bottomPanel.offset.top + heightDiff}px';
   propagateFoldToChildren(bottomPanel, heightDiff);
+}
+
+/// The parent must contain 3 select elements with the classes "type-menu",
+/// "x-axis-menu", "y-axis-menu", and a div element with the class "chart-container".
+showResultsInChart(Element parent, Map<String, List<Map>>data) {
+  SelectElement typeMenu = parent.querySelector('.type-menu');
+  SelectElement xAxisMenu = parent.querySelector('.x-axis-menu')..nodes.clear();
+  SelectElement yAxisMenu = parent.querySelector('.y-axis-menu')..nodes.clear();
+  DivElement chart = parent.querySelector('.chart-container')..nodes.clear();
+
+  Set<String> axisLabels = new Set();
+  data.values.first.forEach(
+    (Map<String, dynamic> dataPoint) => axisLabels.addAll(dataPoint.keys));
+  axisLabels.forEach(
+    (String label) => xAxisMenu.append(new OptionElement(data: label, value: label)));
+  axisLabels.forEach(
+    (String label) => yAxisMenu.append(new OptionElement(data: label, value: label)));
+
+  typeMenu.selectedIndex = 0; // Scatter plot
+  xAxisMenu.selectedIndex = 0; // First value, whatever it is.
+  yAxisMenu.selectedIndex = 1; // Second value, whatever it is. TODO(mariana): make sure that there are more than 2 values.
+  (xAxisMenu.item(1) as OptionElement).disabled = true;
+  (yAxisMenu.item(0) as OptionElement).disabled = true;
+
+  typeMenu.onChange.listen((Event event) => generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data));
+
+  Function disableOtherAxisOption = (SelectElement thisAxis, SelectElement otherAxis) {
+    otherAxis.options.forEach((OptionElement option) {
+      // Enable all other options.
+      if (option.disabled) {
+        option.disabled = false;
+      }
+      // Disable selected option.
+      if (option.value == thisAxis.value) {
+        option.disabled = true;
+      }
+    });
+  };
+  xAxisMenu.onChange.listen((Event event) {
+    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+    disableOtherAxisOption(xAxisMenu, yAxisMenu);
+  });
+  yAxisMenu.onChange.listen((Event event) {
+    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+    disableOtherAxisOption(yAxisMenu, xAxisMenu);
+  });
+
+  generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+}
+
+generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu, SelectElement yAxisMenu, Map<String, List<Map>>data) {
+  if (typeMenu.selectedIndex == 0) { // Scatter plot
+    List dataList = [];
+    data.forEach((String series, List dataPoints) {
+      dataList.add({
+        'x': dataPoints.map((Map dataPoint) => dataPoint[xAxisMenu.value]).toList(),
+        'y': dataPoints.map((Map dataPoint) => dataPoint[yAxisMenu.value]).toList(),
+        'mode': 'markers',
+      });
+    });
+    var layout = {
+      'width': 500,
+      'height': 300,
+      'margin': {
+        't': 20,
+        'l': 40,
+        'r': 40,
+        'b': 40,
+      }
+    };
+    new plotly.Plot(chart, dataList, layout, staticPlot: true);
+  } else if (typeMenu.selectedIndex == 1) { // Bar chart
+    List dataList = [];
+    data.forEach((String series, List dataPoints) {
+      dataList.add({
+        'x': dataPoints.map((Map dataPoint) => dataPoint[xAxisMenu.value]).toList(),
+        'y': dataPoints.map((Map dataPoint) => dataPoint[yAxisMenu.value]).toList(),
+        'type': 'bar',
+      });
+    });
+    var layout = {
+      'width': 500,
+      'height': 300,
+      'margin': {
+        't': 20,
+        'l': 40,
+        'r': 40,
+        'b': 40,
+      }
+    };
+    new plotly.Plot(chart, dataList, layout, staticPlot: true);
+  }
 }

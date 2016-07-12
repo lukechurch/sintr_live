@@ -133,10 +133,7 @@ html, body {
   flex-direction: row;
 }
 
-#output-histogram .areaChart {
-  flex: 1;
-}
-#output-histogram .pieChart {
+#output-histogram .chart-container {
   flex: 1;
 }
 

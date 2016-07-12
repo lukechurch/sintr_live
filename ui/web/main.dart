@@ -9,17 +9,14 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:mdl/mdl.dart';
+import 'package:plotly/plotly.dart' as plotly;
 import 'package:uuid/uuid.dart';
 
-import 'package:sintr_ui/charts/google.charts.dart' as charts;
-import 'package:sintr_ui/charts/google.visualization.dart' as visualization;
 import 'package:sintr_ui/editing/editor.dart';
 import 'package:sintr_ui/editing/editor_codemirror.dart';
 import 'package:sintr_ui/editing/keys.dart';
 
 part 'helper_layout.dart';
-part 'helper_monitor.dart';
-part 'helper_result_chart.dart';
 part 'helper_server_poller.dart';
 part 'utils.dart';
 
@@ -57,63 +54,7 @@ Map resultsErrors = {};
 bool autoRun;
 
 void runCode() {
-  // Clear previous data
-  resultsData = {};
-  resultsErrors = {};
-
-  // Make the request to run the code.
-  var url = '$dartServicesURL/runCode';
-  Map<String, String> sources = {};
-  editors.forEach((DivElement codePanel, Editor editor) {
-    String filename = codePanel.querySelector('.panel-title').text;
-    String code = editor.document.value;
-    sources[filename] = code;
-  });
-  Map<String, dynamic> message = {
-    "sources": sources,
-  };
-  new HttpRequest()
-    ..open("POST", url)
-    ..onLoad.listen((event) {
-      // Poll for new results.
-      var poller = new Poller(
-        "$dartServicesURL/isDone",
-        "$dartServicesURL/results",
-        updateResults);
-      poller.startPolling();
-    })
-    ..send(JSON.encode(message));
-
-  // Create a new chart for the results.
-  drawResultsChartAsAreaChart(outputHistogram.querySelector('.areaChart'));
-  drawResultsChartAsPieChart(outputHistogram.querySelector('.pieChart'));
-}
-
-void updateResults(String results) {
-  Map resultsMap = JSON.decode(results);
-  Map newData = resultsMap['data'];
-  Map newErrors = resultsMap['errors'];
-
-  resultsData.addAll(newData);
-  newErrors.forEach((key, value) {
-    if (resultsErrors.containsKey(key)) {
-      resultsErrors[key] = resultsErrors[key] + value;
-    } else {
-      resultsErrors[key] = value;
-    }
-  });
-
-  rawOutput.querySelector('.card-contents').innerHtml =
-      outputMapStringify(resultsData);
-  errorsOutput.querySelector('.card-contents').innerHtml =
-      errorMapStringify(resultsErrors);
-
-  // Extract new statistics about the results and add them to the chart.
-  int trueCount = resultsData.values.where((bool value) => value == true).length;
-  int falseCount = resultsData.values.where((bool value) => value == false).length;
-
-  addDataToResultsChart(newData);
-  addDataToResultsPieChart({'true': trueCount, 'false': falseCount});
+  // TODO(mariana) Should be replaced with calls to local or remote exec.
 }
 
 // TODO(mariana): consider removing all other code files from the UI (if any present) when this is called.
@@ -166,9 +107,6 @@ void main() {
   });
 
   captureSaveCommand();
-
-  // Load Google Charts.
-  charts.load('current', new charts.GoogleChartsLoadOptions(packages: ['corechart', 'bar']));
 
   // Initialize the elements of the UI.
   rawInput = querySelector('#raw-input');
@@ -350,16 +288,25 @@ Map<String, String> collectCodeSources() {
 logResponseInOutputPanel(HttpRequest request) {
   String responseText = request.responseText;
   if (request.status == 200) {
+    String responseText = request.responseText;
+    var response;
     // Try to encode with it a JSON pretty printer
     try {
+      response = JSON.decode(JSON.decode(responseText)['result']);
+      print(JSON.encode(response));
       JsonEncoder encoder = new JsonEncoder.withIndent("  ");
-      responseText = encoder.convert(JSON.decode(JSON.decode(responseText)['result']));
+      responseText = encoder.convert(response);
     } catch (e, st) {
       print ("Decoding failed");
       print (e);
       print (st);
+      return;
+    }
+    if (response is List) {
+      response = {'dataSeries': response};
     }
     querySelector('#raw-output').querySelector('.card-contents').innerHtml = "<pre>$responseText</pre>";
+    showResultsInChart(querySelector('#output-histogram').querySelector('.card-contents'), response);
   } else {
     querySelector('#raw-output').querySelector('.card-contents').text = 'Request failed, status=${request.status}\n\n$responseText';
   }

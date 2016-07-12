@@ -130,6 +130,7 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
     // TODO(mariana): Remove contentEditable once the input comes from files, not text in the UI.
     if (containsClassOnParentPath(target, 'CodeMirror-code') ||
         containsClassOnParentPath(target, 'title-bar-buttons') ||
+        target is SelectElement ||
         target.contentEditable == "true") {
       return;
     }

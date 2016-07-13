@@ -6,9 +6,9 @@
 
 # This script starts the Sintr front end server
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage start_fe_server.sh gce_project_id"
+if [ "$#" -ne 2 ]; then
+    echo "Usage start_fe_server.sh gce_project_id project_folder"
     exit 1
 fi
 
-dart infrastructure/fe_server/startup.dart $1 8990
+dart infrastructure/fe_server/startup.dart $1 8990 $2

@@ -50,6 +50,13 @@ Map<DivElement, Editor> editors = {};
 Map resultsData = {};
 Map resultsErrors = {};
 
+int pageWidth;
+int pageHeight;
+int distanceBetweenPanels;
+int panelPadding;
+int widthUnit;
+int heightUnit;
+
 // A boolean set in the UI that marks whether the run command is sent only
 // when clicking the Run button or automatically, after every keystroke.
 bool autoRun;
@@ -105,6 +112,55 @@ void main() {
   nodesStatus = querySelector('#nodes-status');
   tasksStatus = querySelector('#tasks-status');
 
+  // Rearrange the UI
+  pageWidth = querySelector('main').client.width;
+  pageHeight = querySelector('main').client.height;
+  distanceBetweenPanels = 24;
+  panelPadding = 16;
+  widthUnit = (pageWidth - 4 * distanceBetweenPanels) ~/ 7;
+  heightUnit = (pageHeight - 2 * distanceBetweenPanels) ~/ 3;
+
+  mapInput.style
+    ..top = '${distanceBetweenPanels}px'
+    ..left = '${distanceBetweenPanels}px'
+    ..width = '${widthUnit * 2 - panelPadding * 2}px'
+    ..height = '${heightUnit - panelPadding * 2}px';
+
+  mapOutputReducerInput.style
+    ..top = '${distanceBetweenPanels + heightUnit}px'
+    ..left = '${distanceBetweenPanels}px'
+    ..width = '${widthUnit * 2 - panelPadding * 2}px'
+    ..height = '${heightUnit - panelPadding * 2}px';
+  reducerOutput.style
+    ..top = '${distanceBetweenPanels + 2 * heightUnit}px'
+    ..left = '${distanceBetweenPanels}px'
+    ..width = '${widthUnit * 2 - panelPadding * 2}px'
+    ..height = '${heightUnit - panelPadding * 2}px';
+
+  nodesStatus.style
+    ..top = '${distanceBetweenPanels}px'
+    ..right = '${distanceBetweenPanels}px'
+    ..width = '${widthUnit * 2 - panelPadding * 2}px'
+    ..height = '${heightUnit ~/ 2 - panelPadding * 2}px';
+
+  tasksStatus.style
+    ..top = '${distanceBetweenPanels + heightUnit ~/ 2}px'
+    ..right = '${distanceBetweenPanels}px'
+    ..width = '${widthUnit * 2 - panelPadding * 2}px'
+    ..height = '${heightUnit ~/ 2 - panelPadding * 2}px';
+
+  errorsOutput.style
+    ..top = '${distanceBetweenPanels + heightUnit}px'
+    ..right = '${distanceBetweenPanels}px'
+    ..width = '${widthUnit * 2 - panelPadding * 2}px'
+    ..height = '${heightUnit - panelPadding * 2}px';
+
+  outputHistogram.style
+    ..bottom = '${distanceBetweenPanels}px'
+    ..left = '${distanceBetweenPanels * 2 + widthUnit * 2}px'
+    ..width = '${widthUnit * 3 - panelPadding * 2}px'
+    ..height = '${heightUnit - distanceBetweenPanels - panelPadding * 2}px';
+
   // Initialize the neighbours of the elements of the UI.
   connections[mapInput] = new Neighbours();
   connections[mapOutputReducerInput] = new Neighbours();
@@ -113,6 +169,15 @@ void main() {
   connections[errorsOutput] = new Neighbours();
   connections[nodesStatus] = new Neighbours();
   connections[tasksStatus] = new Neighbours();
+
+  // Snap any panels which can be snapped
+  handleSnapToOtherPanels(mapInput);
+  handleSnapToOtherPanels(mapOutputReducerInput);
+  handleSnapToOtherPanels(reducerOutput);
+  handleSnapToOtherPanels(nodesStatus);
+  handleSnapToOtherPanels(tasksStatus);
+  handleSnapToOtherPanels(errorsOutput);
+  handleSnapToOtherPanels(outputHistogram);
 
   // Attach listeners for the title bar buttons.
   attachTitleBarButtonsListeners(mapInput);

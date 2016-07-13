@@ -39,12 +39,6 @@ html, body {
   cursor: grabbing;
 }
 
-#nodes-status,
-#tasks-status {
-  padding-right: 0;
-  padding-bottom: 0;
-}
-
 .top-left, .top-right, .bottom-left, .bottom-right {
   position: absolute;
   width: 10px;

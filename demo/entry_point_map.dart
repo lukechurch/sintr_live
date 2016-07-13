@@ -7,7 +7,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+// String -> List<Map<Key, Value>>
 
 Future<String> sintrEntryPoint(String msg) async {
   String text = msg;

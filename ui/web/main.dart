@@ -16,6 +16,8 @@ import 'package:sintr_ui/editing/editor.dart';
 import 'package:sintr_ui/editing/editor_codemirror.dart';
 import 'package:sintr_ui/editing/keys.dart';
 
+import 'package:sintr_ui/in_memory_shuffler.dart' as shuffler;
+
 part 'helper_layout.dart';
 part 'helper_server_poller.dart';
 part 'utils.dart';
@@ -341,7 +343,7 @@ Map<String, String> _selectExecFile(
     return sources;
   }
 
-_localExec() {
+_localExec() async {
   var url = '$dartServicesURL/localExec';
   Map<String, String> sources = collectCodeSources();
   String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
@@ -358,19 +360,31 @@ _localExec() {
     ..send(JSON.encode(message));
 }
 
-_localReducer() {
+_localReducer() async {
   var url = '$dartServicesURL/localReducer';
   Map<String, String> sources = collectCodeSources();
+
+  // Output from the local mapper
   String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
+  List<Map> kvs = JSON.decode(input);
+  Map keyToValueList = shuffler.shuffle(kvs);
+
   sources = _selectExecFile(sources, "entry_point_reducer.dart");
 
-  Map<String, dynamic> message = {
-    "sources": sources,
-    "input": input,
-  };
-  var httpRequest = new HttpRequest();
-  httpRequest
-    ..open("POST", url)
-    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
-    ..send(JSON.encode(message));
+  for (var k in keyToValueList.keys) {
+    var values = keyToValueList[k];
+
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input":
+        JSON.encode( {k : values} )
+    };
+
+    // k, values
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
+      ..send(JSON.encode(message));
+  }
 }

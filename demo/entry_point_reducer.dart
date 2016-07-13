@@ -7,7 +7,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+// JSON coded Map<key, List<Value>> -> List<Map<Key', Value'>>
 
 Future<String> sintrEntryPoint(String msg) async {
   List<Map> kvList = JSON.decode(msg);

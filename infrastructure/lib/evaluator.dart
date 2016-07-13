@@ -40,13 +40,21 @@ Future<String> eval(Map<String, String> source, String message) async {
   _prepareSetup();
   log.trace("_prepareSetup done, about to _installSource (eval: ${sw.elapsedMilliseconds}ms)", 1);
   await _installSource(source);
+
   log.trace("_installSource done, about to _resetWorker (eval: ${sw.elapsedMilliseconds}ms)", 1);
   await _resetWorker("Always reset policy");
+
   log.trace("_resetWorker done, about to _resetWorker (eval: ${sw.elapsedMilliseconds}ms)", 1);
   await _setupIsolate(path.join(workingPath, ISOLATE_STARTUP_NAME));
 
+
   log.trace("Sending: $message (eval: ${sw.elapsedMilliseconds}ms)", 1);
   sendPort.send(message);
+
+  isolate.errors.first.then((onValue) {
+    log.debug("About to kill isolate");
+    isolate.kill();
+  });
 
   String response = await resultsStream.first;
   log.debug("Response: $response (eval: ${sw.elapsedMilliseconds}ms)", 1);

@@ -82,19 +82,6 @@ void getSampleInput() {
   });
 }
 
-void dockAndFoldAllCodeEditors() {
-  List<DivElement> panels = editors.keys.toList();
-  for (int i = 0; i < panels.length; i++) {
-    DivElement panel = panels[i];
-    panel
-      ..style.top = '${30 + 48*i}px'
-      ..style.left = '542px';
-    handleSnapToOtherPanels(panel);
-    ButtonElement foldButton = panel.querySelector('.icon--fold-unfold');
-    foldButton.click();
-  }
-}
-
 void main() {
   // Load Material Design Lite.
   // Even though we're not using anything but the CSS, we still need to do this for the animations & the changes in the buttons.
@@ -280,68 +267,6 @@ void main() {
   getSampleInput();
 }
 
-Map<String, String> collectCodeSources() {
-  Map<String, String> sources = {};
-  editors.forEach((DivElement codePanel, Editor editor) {
-    String filename = codePanel.querySelector('.panel-title').text;
-    String code = editor.document.value;
-    sources[filename] = code;
-  });
-  return sources;
-}
-
-logResponseInOutputPanel(HttpRequest request, String panelId) {
-  String responseText = request.responseText;
-  if (request.status == 200) {
-    String responseText = request.responseText;
-    var response;
-    // Try to encode with it a JSON pretty printer
-    try {
-      response = JSON.decode(JSON.decode(responseText)['result']);
-      print(JSON.encode(response));
-      JsonEncoder encoder = new JsonEncoder.withIndent("  ");
-      responseText = encoder.convert(response);
-    } catch (e, st) {
-      print ("Decoding failed");
-      print (e);
-      print (st);
-      return;
-    }
-    if (response is List) {
-      response = {'dataSeries': response};
-    }
-    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseText;
-    showResultsInChart(querySelector('#output-histogram').querySelector('.card-contents'), response);
-  } else {
-    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = 'Request failed, status=${request.status}\n\n$responseText';
-  }
-}
-
-addNewCodeEditor({String filename: 'default.dart', String code: ''}) {
-  DivElement codePanel = newCodePanel(filename);
-  componentHandler().upgradeElement(codePanel); // for the mdl-library
-  querySelector('main').append(codePanel);
-  connections[codePanel] = new Neighbours();
-  zOrderedElements.add(codePanel);
-  setOnTop(codePanel, zOrderedElements);
-  attachMovementListener(codePanel, zOrderedElements);
-  attachTitleBarButtonsListeners(codePanel);
-  editors[codePanel] = createNewEditor(codePanel.querySelector('.code'));
-  editors[codePanel].document.applyEdit(new SourceEdit(0, 0, code));
-}
-
-Editor createNewEditor(DivElement editorContainer) {
-  Editor editor = editorFactory.createFromElement(editorContainer);
-  // editorContainer.querySelector('.CodeMirror').attributes['flex'] = '';
-  editor.resize();
-  editor.mode = 'dart';
-  editor.document.onChange.listen((bool codeChanged) {
-    if (codeChanged && autoRun) {
-      runCode();
-    }
-  });
-  return editor;
-}
 
 attachTitleBarButtonsListeners(DivElement e) {
   ButtonElement closeButton = e.querySelector('.icon--close');

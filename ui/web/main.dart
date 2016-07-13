@@ -181,6 +181,8 @@ void main() {
 
   querySelector('#localReducer').onClick.listen((_) => _localReducer());
 
+  querySelector('#localAll').onClick.listen((_) => _localAll());
+
   querySelector('#serverExec').onClick.listen((_) => _serverExec());
 
   querySelector('#getResults').onClick.listen((_) => _getResults());
@@ -235,6 +237,7 @@ Map<String, String> _selectExecFile(
   }
 
 _localExec() {
+  print ("localExec");
   var url = '$sintrServerURL/localExec';
   Map<String, String> sources = collectCodeSources();
   String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
@@ -252,6 +255,8 @@ _localExec() {
 }
 
 _localReducer() {
+  print ("localReducer");
+
   var url = '$sintrServerURL/localReducer';
   Map<String, String> sources = collectCodeSources();
   String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
@@ -267,6 +272,46 @@ _localReducer() {
     ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
     ..send(JSON.encode(message));
 }
+
+_localAll() {
+    print ("localExec-All");
+    var url = '$sintrServerURL/localExec';
+    Map<String, String> sources = collectCodeSources();
+    String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
+    sources = _selectExecFile(sources, "entry_point_map.dart");
+
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input": input,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) {
+        logResponseInOutputPanel(httpRequest, 'map-output-reducer-input');
+
+        // Run the reducer
+        print ("localReducer");
+
+        var url = '$sintrServerURL/localReducer';
+        Map<String, String> sources = collectCodeSources();
+        String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
+        sources = _selectExecFile(sources, "entry_point_reducer.dart");
+
+        Map<String, dynamic> message = {
+          "sources": sources,
+          "input": input,
+        };
+        var httpRequestRed = new HttpRequest();
+        httpRequestRed
+          ..open("POST", url)
+          ..onLoad.listen((_) => logResponseInOutputPanel(httpRequestRed, 'reducer-output'))
+          ..send(JSON.encode(message));
+
+
+      })
+      ..send(JSON.encode(message));
+  }
 
 _serverExec() {
   var url = '$sintrServerURL/serverExec';

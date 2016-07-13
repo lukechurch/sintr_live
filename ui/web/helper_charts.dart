@@ -144,7 +144,6 @@ List sortListBasedOnSortMenu(List<Map> data, String xAxisField, String yAxisFiel
       break;
     case 'y-asc':
       dataPoints.sort((Map dataPoint, Map otherDataPoint) {
-        print (dataPoint.toString() + ' - ' + otherDataPoint.toString());
         if (dataPoint[yAxisField] is num && otherDataPoint[yAxisField] is num) {
           return dataPoint[yAxisField] - otherDataPoint[yAxisField];
         } else {

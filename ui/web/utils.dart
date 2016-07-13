@@ -268,6 +268,7 @@ showResultsInChart(Element parent, data) {
   SelectElement typeMenu = parent.querySelector('.type-menu');
   SelectElement xAxisMenu = parent.querySelector('.x-axis-menu')..nodes.clear();
   SelectElement yAxisMenu = parent.querySelector('.y-axis-menu')..nodes.clear();
+  SelectElement sortAxisMenu = parent.querySelector('.sort-axis-menu');
   DivElement chart = parent.querySelector('.chart-container')..nodes.clear();
 
   if (data is List) {
@@ -287,7 +288,7 @@ showResultsInChart(Element parent, data) {
   (xAxisMenu.item(1) as OptionElement).disabled = true;
   (yAxisMenu.item(0) as OptionElement).disabled = true;
 
-  typeMenu.onChange.listen((Event event) => generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data));
+  typeMenu.onChange.listen((Event event) => generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, sortAxisMenu, data));
 
   Function disableOtherAxisOption = (SelectElement thisAxis, SelectElement otherAxis) {
     otherAxis.options.forEach((OptionElement option) {
@@ -302,25 +303,29 @@ showResultsInChart(Element parent, data) {
     });
   };
   xAxisMenu.onChange.listen((Event event) {
-    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, sortAxisMenu, data);
     disableOtherAxisOption(xAxisMenu, yAxisMenu);
   });
   yAxisMenu.onChange.listen((Event event) {
-    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, sortAxisMenu, data);
     disableOtherAxisOption(yAxisMenu, xAxisMenu);
   });
+  sortAxisMenu.onChange.listen((Event event) {
+    generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, sortAxisMenu, data);
+  });
 
-  plot = generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+  plot = generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, sortAxisMenu, data);
 }
 
-plotly.Plot generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu, SelectElement yAxisMenu, Map<String, List<Map>>data) {
+plotly.Plot generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu, SelectElement yAxisMenu, SelectElement sortAxisMenu, Map<String, List<Map>> data) {
   plotly.Plot plot;
   if (typeMenu.selectedIndex == 0) { // Scatter plot
     List dataList = [];
     data.forEach((String series, List dataPoints) {
+      List dataPointsSorted = sortListBasedOnSortMenu(dataPoints, xAxisMenu.value, yAxisMenu.value, sortAxisMenu);
       dataList.add({
-        'x': dataPoints.map((Map dataPoint) => dataPoint[xAxisMenu.value]).toList(),
-        'y': dataPoints.map((Map dataPoint) => dataPoint[yAxisMenu.value]).toList(),
+        'x': dataPointsSorted.map((Map dataPoint) => dataPoint[xAxisMenu.value]).toList(),
+        'y': dataPointsSorted.map((Map dataPoint) => dataPoint[yAxisMenu.value]).toList(),
         'mode': 'markers',
       });
     });
@@ -328,9 +333,10 @@ plotly.Plot generateChart(DivElement chart, SelectElement typeMenu, SelectElemen
   } else { // Bar chart
     List dataList = [];
     data.forEach((String series, List dataPoints) {
+      List dataPointsSorted = sortListBasedOnSortMenu(dataPoints, xAxisMenu.value, yAxisMenu.value, sortAxisMenu);
       dataList.add({
-        'x': dataPoints.map((Map dataPoint) => dataPoint[xAxisMenu.value]).toList(),
-        'y': dataPoints.map((Map dataPoint) => dataPoint[yAxisMenu.value]).toList(),
+        'x': dataPointsSorted.map((Map dataPoint) => dataPoint[xAxisMenu.value]).toList(),
+        'y': dataPointsSorted.map((Map dataPoint) => dataPoint[yAxisMenu.value]).toList(),
         'type': 'bar',
       });
     });
@@ -338,4 +344,50 @@ plotly.Plot generateChart(DivElement chart, SelectElement typeMenu, SelectElemen
   }
   plot.relayout(plotLayout);
   return plot;
+}
+
+List sortListBasedOnSortMenu(List<Map> data, String xAxisField, String yAxisField, SelectElement sortAxisMenu) {
+  List dataPoints = new List.from(data);
+  switch (sortAxisMenu.value) {
+    case 'unsort':
+      break;
+    case 'x-asc':
+      dataPoints.sort((Map dataPoint, Map otherDataPoint) {
+        if (dataPoint[xAxisField] is num && otherDataPoint[xAxisField] is num) {
+          return dataPoint[xAxisField] - otherDataPoint[xAxisField];
+        } else {
+          return dataPoint[xAxisField].toString().compareTo(otherDataPoint[xAxisField].toString());
+        }
+      });
+      break;
+    case 'x-desc':
+      dataPoints.sort((Map dataPoint, Map otherDataPoint) {
+        if (dataPoint[xAxisField] is num && otherDataPoint[xAxisField] is num) {
+          return otherDataPoint[xAxisField] - dataPoint[xAxisField];
+        } else {
+          return otherDataPoint[xAxisField].toString().compareTo(dataPoint[xAxisField].toString());
+        }
+      });
+      break;
+    case 'y-asc':
+      dataPoints.sort((Map dataPoint, Map otherDataPoint) {
+        print (dataPoint.toString() + ' - ' + otherDataPoint.toString());
+        if (dataPoint[yAxisField] is num && otherDataPoint[yAxisField] is num) {
+          return dataPoint[yAxisField] - otherDataPoint[yAxisField];
+        } else {
+          return dataPoint[yAxisField].toString().compareTo(otherDataPoint[yAxisField].toString());
+        }
+      });
+      break;
+    case 'y-desc':
+      dataPoints.sort((Map dataPoint, Map otherDataPoint) {
+        if (dataPoint[yAxisField] is num && otherDataPoint[yAxisField] is num) {
+          return otherDataPoint[yAxisField] - dataPoint[yAxisField];
+        } else {
+          return otherDataPoint[yAxisField].toString().compareTo(dataPoint[yAxisField].toString());
+        }
+      });
+      break;
+  }
+  return dataPoints;
 }

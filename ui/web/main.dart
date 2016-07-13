@@ -8,15 +8,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
+import 'package:http/browser_client.dart';
+import 'package:http/http.dart';
 import 'package:mdl/mdl.dart';
 import 'package:plotly/plotly.dart' as plotly;
 import 'package:uuid/uuid.dart';
 
-import 'package:sintr_ui/editing/editor.dart';
+import 'package:sintr_ui/editing/completion.dart';
 import 'package:sintr_ui/editing/editor_codemirror.dart';
+import 'package:sintr_ui/editing/editor.dart';
 import 'package:sintr_ui/editing/keys.dart';
+import 'package:sintr_ui/services/dartservices.dart' as dartservices;
 
 part 'helper_charts.dart';
+part 'helper_editor.dart';
 part 'helper_layout.dart';
 part 'helper_server_poller.dart';
 part 'panel_definitions.dart';
@@ -38,13 +43,14 @@ Map<DivElement, Neighbours> connections = {};
 List<DivElement> zOrderedElements;
 
 // Code mirror things
-// final String dartServicesURL = 'https://dart-services.appspot.com/';
-final String dartServicesURL = 'http://127.0.0.1:8990';
+final String dartServicesURL = 'https://dart-services.appspot.com/';
+final String sintrServerURL = 'http://127.0.0.1:8990';
 final String setNodeCountPath = 'setNodeCount';
 final String codeKey = new Uuid().v1().toString();
 
 Keys keys = new Keys();
 EditorFactory get editorFactory => codeMirrorFactory;
+dartservices.DartservicesApi dartServices;
 
 final MaterialSnackbar snackbar = new MaterialSnackbar();
 
@@ -142,7 +148,7 @@ void main() {
   attachResizeAndMovementListenersToElement(tasksStatus, zOrderedElements);
 
   // Set the callback for drawing the node monitor chart.
-  var nodesUrl = '$dartServicesURL/nodesStatus';
+  var nodesUrl = '$sintrServerURL/nodesStatus';
   // charts.setOnLoadCallback(allowInterop(() =>
   //     drawMonitorAsStackedBarChart(nodesStatus.querySelector('.contents'), ['ready', 'active'], () {
   //       return HttpRequest.getString(nodesUrl).then((String nodesStatusData) {
@@ -151,7 +157,7 @@ void main() {
   //     })));
 
   // Set the callback for drawing the task monitor chart.
-  var tasksUrl = '$dartServicesURL/tasksStatus';
+  var tasksUrl = '$sintrServerURL/tasksStatus';
   // charts.setOnLoadCallback(allowInterop(() =>
   //     drawMonitorAsStackedBarChart(tasksStatus.querySelector('.contents'), ['ready', 'active', 'done', 'failed'], () {
   //       return HttpRequest.getString(tasksUrl).then((String tasksStatusData) {
@@ -191,6 +197,11 @@ void main() {
   getSampleInputFromServerAndAddToUI();
 
   initializeChartControls(querySelector('#reducer-chart').querySelector('.card-contents'));
+
+  // Get the code mirror editor to offer completion and errors.
+  var client = new SanitizingBrowserClient();
+  dartServices = new dartservices.DartservicesApi(client, rootUrl: dartServicesURL);
+  initKeyBindings();
 }
 
 initKeyBindings() {
@@ -200,7 +211,14 @@ initKeyBindings() {
 
   // No actions yet for Quick fixes and Completions.
   keys.bind(['alt-enter', 'ctrl-1'], () {}, "Quick fix");
-  keys.bind(['ctrl-space', 'macctrl-space'], () {}, "Completion");
+  keys.bind(['ctrl-space', 'macctrl-space'], () {
+    editors.forEach((DivElement editorContainer, Editor editor) {
+      if (editor.hasFocus) {
+        editor.showCompletions(autoInvoked: false);
+      }
+      return;
+    });
+  }, "Completion");
 }
 
 
@@ -217,7 +235,7 @@ Map<String, String> _selectExecFile(
   }
 
 _localExec() {
-  var url = '$dartServicesURL/localExec';
+  var url = '$sintrServerURL/localExec';
   Map<String, String> sources = collectCodeSources();
   String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
   sources = _selectExecFile(sources, "entry_point_map.dart");
@@ -234,7 +252,7 @@ _localExec() {
 }
 
 _localReducer() {
-  var url = '$dartServicesURL/localReducer';
+  var url = '$sintrServerURL/localReducer';
   Map<String, String> sources = collectCodeSources();
   String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
   sources = _selectExecFile(sources, "entry_point_reducer.dart");
@@ -251,7 +269,7 @@ _localReducer() {
 }
 
 _serverExec() {
-  var url = '$dartServicesURL/serverExec';
+  var url = '$sintrServerURL/serverExec';
   Map<String, String> sources = collectCodeSources();
   String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
   String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
@@ -270,7 +288,7 @@ _serverExec() {
 }
 
 _getResults() {
-  var url = '$dartServicesURL/getResults';
+  var url = '$sintrServerURL/getResults';
   String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
   Map<String, dynamic> message = {
     "jobName": jobName,
@@ -283,7 +301,7 @@ _getResults() {
 }
 
 _getTaskStats() {
-  var url = '$dartServicesURL/taskStats';
+  var url = '$sintrServerURL/taskStats';
   var httpRequest = new HttpRequest();
   httpRequest
     ..open("POST", url)
@@ -298,7 +316,7 @@ _setNodeCount() {
     int nodeCount = int.parse(textfieldValue);
     var httpRequest = new HttpRequest();
     httpRequest
-      ..open("POST", "$dartServicesURL/$setNodeCountPath")
+      ..open("POST", "$sintrServerURL/$setNodeCountPath")
       ..onLoad.listen((event) {
         logResponseInOutputPanel(httpRequest, 'map-output-reducer-input');
         snackbar(httpRequest.responseText).show();

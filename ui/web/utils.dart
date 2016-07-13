@@ -202,13 +202,17 @@ Editor createNewEditor(DivElement editorContainer) {
       runCode();
     }
   });
+  editorFactory.registerCompleter('dart', new DartCompleter(dartServices, editor.document));
+  editorContainer.onKeyUp.listen((e) {
+    _handleAutoCompletion(editor, e);
+  });
   return editor;
 }
 
 // TODO(mariana): consider removing all other code files from the UI (if any present) when this is called.
 void getDefaultSourceCodeFromServerAndAddToUI() {
   // Make the request to get the default source code.
-  var url = '$dartServicesURL/sources';
+  var url = '$sintrServerURL/sources';
   HttpRequest.getString(url).then((String sourcesJson) {
     Map<String, String> sources = JSON.decode(sourcesJson);
     sources.forEach((String filename, String code) => addNewCodeEditorPanel(filename: filename, code: code));
@@ -235,7 +239,7 @@ void dockAndFoldAllCodeEditors() {
 
 void getSampleInputFromServerAndAddToUI() {
   // Make the request to get the sample input.
-  var url = '$dartServicesURL/sampleInput';
+  var url = '$sintrServerURL/sampleInput';
   HttpRequest.getString(url).then((String sampleInput) {
 
     String jsonDecoded = JSON.decode(sampleInput);

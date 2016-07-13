@@ -36,14 +36,15 @@ const JOB_NAME = "sintr-live-interactive-job";
  */
 
 String projectId;
+String projectPath;
 bool noCloudProject = false;
 
 main(List<String> args) async {
   log.setupLogging();
   log.debug("Startup args: $args");
 
-  if (args.length != 2) {
-    print ("Usage: Startup cloud_project_id port");
+  if (args.length < 2) {
+    print ("Usage: Startup cloud_project_id port [project_path]");
     print ("If you wish to use the fe_server for local usage only");
     print ("use - for the cloud_project_id");
     io.exit(1);
@@ -57,6 +58,13 @@ main(List<String> args) async {
     log.info("Starting fe_server with cloud project $projectId");
   }
   int port = int.parse(args[1]);
+
+
+  projectPath = new io.Directory("demo").path;
+
+  if (args.length == 3) {
+    projectPath = args[2];
+  }
 
   // Local only startup
   if (noCloudProject) {
@@ -139,7 +147,7 @@ _handleGet(io.HttpRequest request) async {
     case '/sources':
       Map<String, String> sources = {};
 
-      for (var fse in new io.Directory("demo").listSync()) {
+      for (var fse in new io.Directory(projectPath).listSync()) {
         if (!(fse is io.File)) continue;
 
         var name = path_lib.basename(fse.path);
@@ -161,12 +169,14 @@ _handleGet(io.HttpRequest request) async {
 */
 
 case '/sampleInput':
-  var inputDataMap = JSON.decode(new io.File("demo/input.json").readAsStringSync());
+  var inputDataMap = JSON.decode(new io.File(
+    path_lib.join(projectPath, "input.json")).readAsStringSync());
   var inputFileName = inputDataMap["files"].first;
 
   res.add(
     UTF8.encode(JSON.encode(
-      new io.File("demo/$inputFileName").readAsStringSync()
+      new io.File(
+        path_lib.join(projectPath, inputFileName)).readAsStringSync()
     ))
   );
 

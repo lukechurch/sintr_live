@@ -84,7 +84,7 @@ BSD-style license that can be found in the LICENSE file.
 
         <div class="mdl-textfield mdl-js-textfield" style="width: 128px;">
             <input id="server-job-name-textfield" class="mdl-textfield__input" type="text" value="default-job-name">
-            <label class="mdl-textfield__label" for="node-count-textfield">Enter the name of the job to be run on the server</label>
+            <label class="mdl-textfield__label" for="node-count-textfield"></label>
         </div>
 
         <button id="serverExec" class="server-api-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
@@ -106,7 +106,7 @@ BSD-style license that can be found in the LICENSE file.
         <div class="header-entry">
           <div class="mdl-textfield mdl-js-textfield" style="width: 64px;">
               <input id="node-count-textfield" class="mdl-textfield__input" type="text" pattern="[0-9]*" value="100">
-              <label class="mdl-textfield__label" for="node-count-textfield">Enter number of nodes</label>
+              <label class="mdl-textfield__label" for="node-count-textfield"></label>
               <span class="mdl-textfield__error">Input is not a number!</span>
           </div>
           <button id="set-node-count-button" class="mdl-button mdl-js-button">
@@ -119,111 +119,9 @@ BSD-style license that can be found in the LICENSE file.
 
 
     <main class="mdl-layout__content">
-
-      <div id="map-input" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <h1 class="panel-title">Map input</h1>
-
-        <!-- TODO(mariana): Remove contenteditable="true" once the input format is from files -->
-        <div class="card-contents"><pre contenteditable="true"></pre></div>
-      </div>
-
-      <div id="map-output-reducer-input" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <h1 class="panel-title">Map output / Reducer input</h1>
-        <div class="card-contents"><pre></pre></div>
-      </div>
-
-      <div id="reducer-output" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <h1 class="panel-title">Reducer output</h1>
-        <div class="card-contents"><pre></pre></div>
-      </div>
-
-      <div id="output-histogram" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <div class="card-contents">
-          <select class="type-menu" name="type-menu">
-            <option value="scatter">Scatter plot</option>
-            <option value="bar">Bar chart</option>
-          </select>
-          <select class="x-axis-menu" name="x-axis-menu"></select>
-          <select class="y-axis-menu" name="y-axis-menu"></select>
-          <select class="sort-axis-menu" name="sort-axis-menu">
-            <option value="unsort" selected>Unsorted</option>
-            <option value="x-asc">Sort by x axis ascending</option>
-            <option value="x-desc">Sort by x axis descending</option>
-            <option value="y-asc">Sort by y axis ascending</option>
-            <option value="y-desc">Sort by y axis descending</option>
-          </select>
-          <div class="chart-container"></div>
-        </div>
-      </div>
-
-      <div id="errors-output" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <h1 class="panel-title">Errors</h1>
-        <div class="card-contents"></div>
-      </div>
-
-      <div id="nodes-status" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <h1 class="panel-title">Sintr nodes status</h1>
-        <div class="card-contents"></div>
-      </div>
-
-      <div id="tasks-status" class="panel mdl-panel mdl-panel--shadow">
-        <div class="resize-controls">
-          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
-          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
-        </div>
-        <div class="title-bar-buttons">
-          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
-        </div>
-        <h1 class="panel-title">Compute tasks status</h1>
-        <div class="card-contents"></div>
-      </div>
-
       <button id="add-nodule" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--accent">
         <i class="material-icons">add</i>
       </button>
-
     </main>
   </div>
 

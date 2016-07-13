@@ -111,12 +111,12 @@ html, body {
   flex-direction: column;
 }
 
-#output-histogram {
+#reducer-chart {
   display: flex;
   flex-direction: row;
 }
 
-#output-histogram .chart-container {
+#reducer-chart .chart-container {
   flex: 1;
   width: 100%;
   height: calc(100% - 18px);

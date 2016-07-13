@@ -169,11 +169,11 @@ void main() {
 
   // Set callbacks for server API calls.
   querySelector('#localExec').onClick.listen((MouseEvent event) {
-    _localExec();
+   _localExec();
   });
 
-  querySelector('#localReducer').onClick.listen((MouseEvent event) {
-    _localReducer();
+  querySelector('#localReducer').onClick.listen((MouseEvent event) async {
+    await _localReducer();
   });
 
   querySelector('#serverExec').onClick.listen((MouseEvent event) {
@@ -371,6 +371,8 @@ _localReducer() async {
 
   sources = _selectExecFile(sources, "entry_point_reducer.dart");
 
+  List<Map> dataSeenSoFar = [];
+
   for (var k in keyToValueList.keys) {
     var values = keyToValueList[k];
 
@@ -382,9 +384,16 @@ _localReducer() async {
 
     // k, values
     var httpRequest = new HttpRequest();
-    httpRequest
-      ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
-      ..send(JSON.encode(message));
+    httpRequest.open("POST", url);
+    httpRequest.onLoad.listen((_) {
+      String result = httpRequest.responseText;
+      print (result);
+      var lst = JSON.decode(JSON.decode(result)["result"]);
+      print (lst);
+      dataSeenSoFar.addAll(lst);
+      logResponseInOutputPanelLst(dataSeenSoFar, 'reducer-output');
+    });
+    httpRequest.send(JSON.encode(message));
+
   }
 }

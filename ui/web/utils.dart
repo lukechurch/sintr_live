@@ -444,6 +444,41 @@ logResponseInOutputPanel(HttpRequest request, String panelId) {
   }
 }
 
+logResponseInOutputPanelText(String responseText, String panelId) {
+    var response;
+    // Try to encode with it a JSON pretty printer
+    try {
+      response = JSON.decode(JSON.decode(responseText)['result']);
+      print(JSON.encode(response));
+      JsonEncoder encoder = new JsonEncoder.withIndent("  ");
+      responseText = encoder.convert(response);
+    } catch (e, st) {
+      print ("Decoding failed");
+      print (e);
+      print (st);
+      return;
+    }
+    if (response is List) {
+      response = {'dataSeries': response};
+    }
+    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseText;
+    showResultsInChart(querySelector('#output-histogram').querySelector('.card-contents'), response);
+}
+
+
+logResponseInOutputPanelLst(List response, String panelId) {
+      JsonEncoder encoder = new JsonEncoder.withIndent("  ");
+      var responseText = encoder.convert(response);
+
+      Map responseMap;
+
+    if (response is List) {
+      responseMap = {'dataSeries': response};
+    }
+    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseText;
+    showResultsInChart(querySelector('#output-histogram').querySelector('.card-contents'), responseMap);
+}
+
 addNewCodeEditor({String filename: 'default.dart', String code: ''}) {
   DivElement codePanel = newCodePanel(filename);
   componentHandler().upgradeElement(codePanel); // for the mdl-library

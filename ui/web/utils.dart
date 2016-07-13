@@ -158,7 +158,7 @@ logResponseInOutputPanel(HttpRequest request, String panelId) {
     // Try to encode with it a JSON pretty printer
     try {
       response = JSON.decode(JSON.decode(responseText)['result']);
-      print(JSON.encode(response));
+      // print(JSON.encode(response));
       JsonEncoder encoder = new JsonEncoder.withIndent("  ");
       responseText = encoder.convert(response);
     } catch (e, st) {

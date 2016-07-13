@@ -216,6 +216,7 @@ void getDefaultSourceCodeFromServerAndAddToUI() {
   });
 }
 
+// See [layoutPanels] for more details as to the layout of the panels.
 void dockAndFoldAllCodeEditors() {
   int foldedPanelHeight = 48;
   List<DivElement> panels = editors.keys.toList();

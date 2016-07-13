@@ -373,4 +373,6 @@ void layoutPanels(
     ..right = '${distanceBetweenPanels}px'
     ..width = '${widthUnit * 2 - panelPadding * 2}px'
     ..height = '${heightUnit - panelPadding * 2}px';
+
+  // The layout for code editors is done in [dockAndFoldAllCodeEditors].
 }

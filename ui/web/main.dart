@@ -21,8 +21,9 @@ part 'helper_server_poller.dart';
 part 'utils.dart';
 
 
-DivElement rawInput;
-DivElement rawOutput;
+DivElement mapInput;
+DivElement mapOutputReducerInput;
+DivElement reducerOutput;
 DivElement outputHistogram;
 DivElement errorsOutput;
 DivElement nodesStatus;
@@ -76,7 +77,7 @@ void getSampleInput() {
     String jsonDecoded = JSON.decode(sampleInput);
     // rawInput.querySelector('.card-contents').innerHtml =
     //     inputMapStringify(JSON.decode(sampleInput));
-    rawInput.querySelector('.card-contents').text =
+    mapInput.querySelector('.card-contents').querySelector('pre').text =
         "$jsonDecoded";
   });
 }
@@ -109,24 +110,27 @@ void main() {
   captureSaveCommand();
 
   // Initialize the elements of the UI.
-  rawInput = querySelector('#raw-input');
-  rawOutput = querySelector('#raw-output');
+  mapInput = querySelector('#map-input');
+  mapOutputReducerInput = querySelector('#map-output-reducer-input');
+  reducerOutput = querySelector('#reducer-output');
   outputHistogram = querySelector('#output-histogram');
   errorsOutput = querySelector('#errors-output');
   nodesStatus = querySelector('#nodes-status');
   tasksStatus = querySelector('#tasks-status');
 
   // Initialize the neighbours of the elements of the UI.
-  connections[rawInput] = new Neighbours();
-  connections[rawOutput] = new Neighbours();
+  connections[mapInput] = new Neighbours();
+  connections[mapOutputReducerInput] = new Neighbours();
+  connections[reducerOutput] = new Neighbours();
   connections[outputHistogram] = new Neighbours();
   connections[errorsOutput] = new Neighbours();
   connections[nodesStatus] = new Neighbours();
   connections[tasksStatus] = new Neighbours();
 
   // Attach listeners for the title bar buttons.
-  attachTitleBarButtonsListeners(rawInput);
-  attachTitleBarButtonsListeners(rawOutput);
+  attachTitleBarButtonsListeners(mapInput);
+  attachTitleBarButtonsListeners(mapOutputReducerInput);
+  attachTitleBarButtonsListeners(reducerOutput);
   attachTitleBarButtonsListeners(outputHistogram);
   attachTitleBarButtonsListeners(errorsOutput);
   attachTitleBarButtonsListeners(nodesStatus);
@@ -134,11 +138,12 @@ void main() {
 
   // Set the order in which things are displayed on the screen.
   // This matches initially with the order in the DOM.
-  zOrderedElements = [rawInput, rawOutput, outputHistogram, errorsOutput, nodesStatus, tasksStatus];
+  zOrderedElements = [mapInput, mapOutputReducerInput, reducerOutput, outputHistogram, errorsOutput, nodesStatus, tasksStatus];
 
   // Attach listeners for movement and resizing.
-  attachMovementListener(rawInput, zOrderedElements);
-  attachMovementListener(rawOutput, zOrderedElements);
+  attachMovementListener(mapInput, zOrderedElements);
+  attachMovementListener(mapOutputReducerInput, zOrderedElements);
+  attachMovementListener(reducerOutput, zOrderedElements);
   attachMovementListener(outputHistogram, zOrderedElements);
   attachMovementListener(errorsOutput, zOrderedElements);
   attachMovementListener(nodesStatus, zOrderedElements);
@@ -177,7 +182,7 @@ void main() {
   querySelector('#localExec').onClick.listen((MouseEvent event) {
     var url = '$dartServicesURL/localExec';
     Map<String, String> sources = collectCodeSources();
-    String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
     sources = _selectExecFile(sources, "entry_point_map.dart");
 
     Map<String, dynamic> message = {
@@ -187,14 +192,14 @@ void main() {
     var httpRequest = new HttpRequest();
     httpRequest
       ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
       ..send(JSON.encode(message));
   });
 
   querySelector('#localReducer').onClick.listen((MouseEvent event) {
     var url = '$dartServicesURL/localReducer';
     Map<String, String> sources = collectCodeSources();
-    String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
     sources = _selectExecFile(sources, "entry_point_reducer.dart");
 
     Map<String, dynamic> message = {
@@ -204,14 +209,14 @@ void main() {
     var httpRequest = new HttpRequest();
     httpRequest
       ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
       ..send(JSON.encode(message));
   });
 
   querySelector('#serverExec').onClick.listen((MouseEvent event) {
     var url = '$dartServicesURL/serverExec';
     Map<String, String> sources = collectCodeSources();
-    String input = querySelector('#raw-input').querySelector('.card-contents').text;
+    String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
     String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
     sources = _selectExecFile(sources, "entry_point_map.dart");
 
@@ -223,7 +228,7 @@ void main() {
     var httpRequest = new HttpRequest();
     httpRequest
       ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
       ..send(JSON.encode(message));
   });
 
@@ -236,7 +241,7 @@ void main() {
     var httpRequest = new HttpRequest();
     httpRequest
       ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
       ..send(JSON.encode(message));
   });
 
@@ -245,7 +250,7 @@ void main() {
     var httpRequest = new HttpRequest();
     httpRequest
       ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest))
+      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
       ..send(JSON.encode('taskStats'));
   });
 
@@ -259,7 +264,7 @@ void main() {
       httpRequest
         ..open("POST", "$dartServicesURL/$setNodeCountPath")
         ..onLoad.listen((event) {
-          logResponseInOutputPanel(httpRequest);
+          logResponseInOutputPanel(httpRequest, 'map-output-reducer-input');
           snackbar(httpRequest.responseText).show();
         })
         ..send(JSON.encode({'count': nodeCount}));
@@ -285,7 +290,7 @@ Map<String, String> collectCodeSources() {
   return sources;
 }
 
-logResponseInOutputPanel(HttpRequest request) {
+logResponseInOutputPanel(HttpRequest request, String panelId) {
   String responseText = request.responseText;
   if (request.status == 200) {
     String responseText = request.responseText;
@@ -305,10 +310,10 @@ logResponseInOutputPanel(HttpRequest request) {
     if (response is List) {
       response = {'dataSeries': response};
     }
-    querySelector('#raw-output').querySelector('.card-contents').innerHtml = "<pre>$responseText</pre>";
+    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseText;
     showResultsInChart(querySelector('#output-histogram').querySelector('.card-contents'), response);
   } else {
-    querySelector('#raw-output').querySelector('.card-contents').text = 'Request failed, status=${request.status}\n\n$responseText';
+    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = 'Request failed, status=${request.status}\n\n$responseText';
   }
 }
 

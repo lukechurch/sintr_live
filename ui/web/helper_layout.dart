@@ -112,6 +112,9 @@ void attachMovementListener(DivElement e, List<DivElement> zOrderedElements) {
 
           moveChildrenConnections(e, 0, mouseMovementY);
         }
+        if (e.id == 'output-histogram') {
+          plot.relayout(plotLayout);
+        }
       });
 
       StreamSubscription mouseUp;

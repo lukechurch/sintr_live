@@ -12,7 +12,7 @@ import 'dart:io';
 Future<String> sintrEntryPoint(String msg) async {
   String text = msg;
 
-  List<String> words = text.split(" ");
+  List<String> words = text.split(new RegExp(r"(\s+)"));
   List<Map<String, int>> kvs = [];
 
   int i = 0;

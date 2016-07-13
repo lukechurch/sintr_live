@@ -27,27 +27,15 @@ html, body {
   z-index: 900;
 }
 
-#raw-input, #raw-output, #output-histogram, #errors-output, #nodes-status, #tasks-status, #initial-code-panel, .code-panel {
+.panel {
   position: absolute;
 }
 
-#raw-input:hover,
-#raw-output:hover,
-#output-histogram:hover,
-#errors-output:hover,
-#nodes-status:hover,
-#tasks-status:hover,
-#initial-code-panel:hover {
+.panel:hover {
   cursor: grab;
 }
 
-#raw-input:active,
-#raw-output:active,
-#output-histogram:active,
-#errors-output:active,
-#nodes-status:active,
-#tasks-status:active,
-#initial-code-panel:active {
+.panel:active {
   cursor: grabbing;
 }
 
@@ -121,8 +109,9 @@ html, body {
   padding: 16px;
 }
 
-#raw-input,
-#raw-output,
+#map-input,
+#map-output-reducer-input,
+#reducer-output,
 #errors-output {
   display: flex;
   flex-direction: column;
@@ -135,6 +124,8 @@ html, body {
 
 #output-histogram .chart-container {
   flex: 1;
+  width: 100%;
+  height: calc(100% - 18px);
 }
 
 .panel-title {

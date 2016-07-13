@@ -120,7 +120,7 @@ BSD-style license that can be found in the LICENSE file.
 
     <main class="mdl-layout__content">
 
-      <div id="raw-input" style="width: 450px; height: 400px; left: 30px; top: 30px;" class="mdl-panel mdl-panel--shadow">
+      <div id="map-input" style="width: 450px; height: 400px; left: 30px; top: 30px;" class="panel mdl-panel mdl-panel--shadow">
         <div class="resize-controls">
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
@@ -128,13 +128,13 @@ BSD-style license that can be found in the LICENSE file.
         <div class="title-bar-buttons">
           <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
         </div>
-        <h1 class="panel-title">Sample input</h1>
+        <h1 class="panel-title">Map input</h1>
 
         <!-- TODO(mariana): Remove contenteditable="true" once the input format is from files -->
-        <div class="card-contents" contenteditable="true"></div>
+        <div class="card-contents"><pre contenteditable="true"></pre></div>
       </div>
 
-      <div id="raw-output" style="width: 650px; height: 400px; right: 30px; top: 30px;" class="mdl-panel mdl-panel--shadow">
+      <div id="map-output-reducer-input" style="width: 650px; height: 400px; right: 30px; top: 30px;" class="panel mdl-panel mdl-panel--shadow">
         <div class="resize-controls">
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
@@ -142,11 +142,23 @@ BSD-style license that can be found in the LICENSE file.
         <div class="title-bar-buttons">
           <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
         </div>
-        <h1 class="panel-title">Output</h1>
-        <div class="card-contents"></div>
+        <h1 class="panel-title">Map output / Reducer input</h1>
+        <div class="card-contents"><pre></pre></div>
       </div>
 
-      <div id="output-histogram" style="width: 650px; height: 300px; top: 492px; right: 30px;" class="mdl-panel mdl-panel--shadow">
+      <div id="reducer-output" style="width: 650px; height: 400px; right: 300px; top: 90px;" class="panel mdl-panel mdl-panel--shadow">
+        <div class="resize-controls">
+          <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
+          <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
+        </div>
+        <div class="title-bar-buttons">
+          <button class="mdl-button mdl-js-button mdl-button--icon icon--fold-unfold"><i class="material-icons">unfold_less</i></button>
+        </div>
+        <h1 class="panel-title">Reducer output</h1>
+        <div class="card-contents"><pre></pre></div>
+      </div>
+
+      <div id="output-histogram" style="width: 650px; height: 300px; top: 492px; right: 30px;" class="panel mdl-panel mdl-panel--shadow">
         <div class="resize-controls">
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
@@ -165,7 +177,7 @@ BSD-style license that can be found in the LICENSE file.
         </div>
       </div>
 
-      <div id="errors-output" style=" width: 604px; height: 300px; left: 542px; top: 492px;" class="mdl-panel mdl-panel--shadow">
+      <div id="errors-output" style=" width: 604px; height: 300px; left: 542px; top: 492px;" class="panel mdl-panel mdl-panel--shadow">
         <div class="resize-controls">
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
@@ -177,7 +189,7 @@ BSD-style license that can be found in the LICENSE file.
         <div class="card-contents"></div>
       </div>
 
-      <div id="nodes-status" style="width: 450px; height: 96px; left: 30px; bottom: 145px" class="mdl-panel mdl-panel--shadow">
+      <div id="nodes-status" style="width: 450px; height: 96px; left: 30px; bottom: 145px" class="panel mdl-panel mdl-panel--shadow">
         <div class="resize-controls">
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
@@ -189,7 +201,7 @@ BSD-style license that can be found in the LICENSE file.
         <div class='contents' style='width: 100%; height: calc(100% - 32px);'></div>
       </div>
 
-      <div id="tasks-status" style="width: 450px; height: 96px; left: 30px; bottom: 30px" class="mdl-panel mdl-panel--shadow">
+      <div id="tasks-status" style="width: 450px; height: 96px; left: 30px; bottom: 30px" class="panel mdl-panel mdl-panel--shadow">
         <div class="resize-controls">
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>

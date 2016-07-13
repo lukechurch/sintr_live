@@ -10,7 +10,16 @@ import 'dart:convert';
 import 'dart:io';
 
 Future<String> sintrEntryPoint(String msg) async {
-  Map kvs = JSON.decode(msg);
-  List vs = kvs.values.first;
-  return JSON.encode(vs.length);
+  List<Map> kvList = JSON.decode(msg);
+  Map<String, int> kvMap = {};
+  kvList.forEach((Map<String, int> kv) {
+    String word = kv.keys.first;
+    int count = kv.values.first;
+    kvMap.putIfAbsent(word, () => 0);
+    kvMap[word] = kvMap[word] + count;
+  });
+
+  List<Map<String, int>> result = [];
+  kvMap.forEach((String word, int count) => result.add({'word': word, 'count': count}));
+  return JSON.encode(result);
 }

@@ -124,7 +124,7 @@ DivElement newEmptyPanel({String id, Map<String, String> style, bool withResizeC
           <div class="top-left"></div><div class="top-right"></div><div class="bottom-left"></div><div class="bottom-right"></div>
           <div class="top"></div><div class="right"></div><div class="left"></div><div class="bottom"></div>
          </div>""" : "";
-  return new Element.html("""<div $idAttribute ${styleAttributeBuffer.toString()} class="mdl-panel mdl-panel--shadow"> $resizeControls </div>""",
+  return new Element.html("""<div $idAttribute ${styleAttributeBuffer.toString()} class="panel mdl-panel mdl-panel--shadow"> $resizeControls </div>""",
       validator: new NodeValidatorBuilder()
           ..allowHtml5()
           ..allowInlineStyles());
@@ -251,14 +251,28 @@ propagateFoldToChildren(DivElement panel, int heightDiff) {
   propagateFoldToChildren(bottomPanel, heightDiff);
 }
 
+plotly.Plot plot;
+var plotLayout = {
+  'autosize': true,
+  'margin': {
+    't': 20,
+    'l': 40,
+    'r': 40,
+    'b': 40,
+  }
+};
+
 /// The parent must contain 3 select elements with the classes "type-menu",
 /// "x-axis-menu", "y-axis-menu", and a div element with the class "chart-container".
-showResultsInChart(Element parent, Map<String, List<Map>>data) {
+showResultsInChart(Element parent, data) {
   SelectElement typeMenu = parent.querySelector('.type-menu');
   SelectElement xAxisMenu = parent.querySelector('.x-axis-menu')..nodes.clear();
   SelectElement yAxisMenu = parent.querySelector('.y-axis-menu')..nodes.clear();
   DivElement chart = parent.querySelector('.chart-container')..nodes.clear();
 
+  if (data is List) {
+    data = {'Series1': data};
+  }
   Set<String> axisLabels = new Set();
   data.values.first.forEach(
     (Map<String, dynamic> dataPoint) => axisLabels.addAll(dataPoint.keys));
@@ -296,10 +310,11 @@ showResultsInChart(Element parent, Map<String, List<Map>>data) {
     disableOtherAxisOption(yAxisMenu, xAxisMenu);
   });
 
-  generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
+  plot = generateChart(chart, typeMenu, xAxisMenu, yAxisMenu, data);
 }
 
-generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu, SelectElement yAxisMenu, Map<String, List<Map>>data) {
+plotly.Plot generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu, SelectElement yAxisMenu, Map<String, List<Map>>data) {
+  plotly.Plot plot;
   if (typeMenu.selectedIndex == 0) { // Scatter plot
     List dataList = [];
     data.forEach((String series, List dataPoints) {
@@ -309,18 +324,8 @@ generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu,
         'mode': 'markers',
       });
     });
-    var layout = {
-      'width': 500,
-      'height': 300,
-      'margin': {
-        't': 20,
-        'l': 40,
-        'r': 40,
-        'b': 40,
-      }
-    };
-    new plotly.Plot(chart, dataList, layout, staticPlot: true);
-  } else if (typeMenu.selectedIndex == 1) { // Bar chart
+    plot = new plotly.Plot(chart, dataList, plotLayout, staticPlot: true);
+  } else { // Bar chart
     List dataList = [];
     data.forEach((String series, List dataPoints) {
       dataList.add({
@@ -329,16 +334,8 @@ generateChart(DivElement chart, SelectElement typeMenu, SelectElement xAxisMenu,
         'type': 'bar',
       });
     });
-    var layout = {
-      'width': 500,
-      'height': 300,
-      'margin': {
-        't': 20,
-        'l': 40,
-        'r': 40,
-        'b': 40,
-      }
-    };
-    new plotly.Plot(chart, dataList, layout, staticPlot: true);
+    plot = new plotly.Plot(chart, dataList, plotLayout, staticPlot: true);
   }
+  plot.relayout(plotLayout);
+  return plot;
 }

@@ -373,6 +373,8 @@ _localReducer() async {
 
   List<Map> dataSeenSoFar = [];
 
+  int updateUIStep = 50;
+  int step = 0;
   for (var k in keyToValueList.keys) {
     var values = keyToValueList[k];
 
@@ -387,13 +389,16 @@ _localReducer() async {
     httpRequest.open("POST", url);
     httpRequest.onLoad.listen((_) {
       String result = httpRequest.responseText;
-      print (result);
       var lst = JSON.decode(JSON.decode(result)["result"]);
-      print (lst);
       dataSeenSoFar.addAll(lst);
-      logResponseInOutputPanelLst(dataSeenSoFar, 'reducer-output');
+      step++;
+      print(step);
+      if (step % updateUIStep == 0 || step == keyToValueList.length) {
+        logResponseInOutputPanelLst(dataSeenSoFar, 'reducer-output');
+      }
     });
     httpRequest.send(JSON.encode(message));
 
+    // await new Future.delayed(const Duration(milliseconds: 10));
   }
 }

@@ -56,6 +56,9 @@ Map resultsErrors = {};
 // when clicking the Run button or automatically, after every keystroke.
 bool autoRun;
 
+int activeReducerJob = -1;
+int reducerJobIndex = 0;
+
 void runCode() {
   // TODO(mariana) Should be replaced with calls to local or remote exec.
 }
@@ -172,8 +175,10 @@ void main() {
    _localExec();
   });
 
-  querySelector('#localReducer').onClick.listen((MouseEvent event) async {
-    await _localReducer();
+  querySelector('#localReducer').onClick.listen((MouseEvent event) {
+    reducerJobIndex++;
+    activeReducerJob = reducerJobIndex;
+    _localReducer(reducerJobIndex);
   });
 
   querySelector('#serverExec').onClick.listen((MouseEvent event) {
@@ -360,7 +365,7 @@ _localExec() async {
     ..send(JSON.encode(message));
 }
 
-_localReducer() async {
+_localReducer(int jobIndex) async {
   var url = '$dartServicesURL/localReducer';
   Map<String, String> sources = collectCodeSources();
 
@@ -376,6 +381,9 @@ _localReducer() async {
   int updateUIStep = 50;
   int step = 0;
   for (var k in keyToValueList.keys) {
+    if (jobIndex != activeReducerJob) {
+      return;
+    }
     var values = keyToValueList[k];
 
     Map<String, dynamic> message = {
@@ -388,17 +396,25 @@ _localReducer() async {
     var httpRequest = new HttpRequest();
     httpRequest.open("POST", url);
     httpRequest.onLoad.listen((_) {
+      if (jobIndex != activeReducerJob) {
+        // The user has activated another reduce job, cancel this one.
+        print('Cancelling reducer $jobIndex');
+        return;
+      }
       String result = httpRequest.responseText;
       var lst = JSON.decode(JSON.decode(result)["result"]);
       dataSeenSoFar.addAll(lst);
       step++;
-      print(step);
       if (step % updateUIStep == 0 || step == keyToValueList.length) {
         logResponseInOutputPanelLst(dataSeenSoFar, 'reducer-output');
       }
     });
     httpRequest.send(JSON.encode(message));
 
-    // await new Future.delayed(const Duration(milliseconds: 10));
+    // The higher the number here, the better it can switch from a reduce job
+    // to another. 40ms seems to be about the time it takes for the request to
+    // be completed, so processing the old request and sending a new one happens
+    // at the same time.
+    await new Future.delayed(const Duration(milliseconds: 10));
   }
 }

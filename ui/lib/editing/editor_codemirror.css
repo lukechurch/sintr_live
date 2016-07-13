@@ -8,15 +8,15 @@
 /* CodeMirror tweaks */
 
 .squiggle-error {
-  border-bottom: 2px solid #F7977A;
+  border-bottom: 2px solid #F5440D;
 }
 
 .squiggle-warning {
-  border-bottom: 2px solid #FFF79A;
+  border-bottom: 2px solid #FFC252;
 }
 
 .squiggle-info {
-  border-bottom: 2px solid #7EA7D8;
+  border-bottom: 2px solid #4497F9;
 }
 
 /* Zenburn theme overrides for code completion. */

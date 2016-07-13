@@ -206,6 +206,16 @@ Editor createNewEditor(DivElement editorContainer) {
   editorContainer.onKeyUp.listen((e) {
     _handleAutoCompletion(editor, e);
   });
+
+  // Listener for static analysis
+  Timer timer;
+  int delayMilliseconds = 500;
+  editor.document.onChange.listen((_) {
+    if (timer != null) timer.cancel();
+    timer = new Timer(new Duration(milliseconds: delayMilliseconds), () {
+      _performAnalysis(editor);
+    });
+  });
   return editor;
 }
 

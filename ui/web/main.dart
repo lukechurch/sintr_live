@@ -45,6 +45,8 @@ List<DivElement> zOrderedElements;
 // Code mirror things
 final String dartServicesURL = 'https://dart-services.appspot.com/';
 final String sintrServerURL = 'http://127.0.0.1:8990';
+final Duration serviceCallTimeout = new Duration(seconds: 10);
+
 final String setNodeCountPath = 'setNodeCount';
 final String codeKey = new Uuid().v1().toString();
 

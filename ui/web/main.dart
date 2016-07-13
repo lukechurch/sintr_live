@@ -167,37 +167,11 @@ void main() {
 
   // Set callbacks for server API calls.
   querySelector('#localExec').onClick.listen((MouseEvent event) {
-    var url = '$dartServicesURL/localExec';
-    Map<String, String> sources = collectCodeSources();
-    String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
-    sources = _selectExecFile(sources, "entry_point_map.dart");
-
-    Map<String, dynamic> message = {
-      "sources": sources,
-      "input": input,
-    };
-    var httpRequest = new HttpRequest();
-    httpRequest
-      ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
-      ..send(JSON.encode(message));
+    _localExec();
   });
 
   querySelector('#localReducer').onClick.listen((MouseEvent event) {
-    var url = '$dartServicesURL/localReducer';
-    Map<String, String> sources = collectCodeSources();
-    String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
-    sources = _selectExecFile(sources, "entry_point_reducer.dart");
-
-    Map<String, dynamic> message = {
-      "sources": sources,
-      "input": input,
-    };
-    var httpRequest = new HttpRequest();
-    httpRequest
-      ..open("POST", url)
-      ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
-      ..send(JSON.encode(message));
+    _localReducer();
   });
 
   querySelector('#serverExec').onClick.listen((MouseEvent event) {
@@ -366,3 +340,37 @@ Map<String, String> _selectExecFile(
 
     return sources;
   }
+
+_localExec() {
+  var url = '$dartServicesURL/localExec';
+  Map<String, String> sources = collectCodeSources();
+  String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
+  sources = _selectExecFile(sources, "entry_point_map.dart");
+
+  Map<String, dynamic> message = {
+    "sources": sources,
+    "input": input,
+  };
+  var httpRequest = new HttpRequest();
+  httpRequest
+    ..open("POST", url)
+    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
+    ..send(JSON.encode(message));
+}
+
+_localReducer() {
+  var url = '$dartServicesURL/localReducer';
+  Map<String, String> sources = collectCodeSources();
+  String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
+  sources = _selectExecFile(sources, "entry_point_reducer.dart");
+
+  Map<String, dynamic> message = {
+    "sources": sources,
+    "input": input,
+  };
+  var httpRequest = new HttpRequest();
+  httpRequest
+    ..open("POST", url)
+    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
+    ..send(JSON.encode(message));
+}

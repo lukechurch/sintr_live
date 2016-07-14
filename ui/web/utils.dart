@@ -209,11 +209,6 @@ Editor createNewEditor(DivElement editorContainer) {
   // editorContainer.querySelector('.CodeMirror').attributes['flex'] = '';
   editor.resize();
   editor.mode = 'dart';
-  editor.document.onChange.listen((bool codeChanged) {
-    if (codeChanged && autoRun) {
-      runCode();
-    }
-  });
   editorFactory.registerCompleter('dart', new DartCompleter(dartServices, editor.document));
   editorContainer.onKeyUp.listen((e) {
     _handleAutoCompletion(editor, e);
@@ -232,6 +227,9 @@ Editor createNewEditor(DivElement editorContainer) {
     analysisTimer = new Timer(new Duration(milliseconds: analysisDelayMilliseconds), () {
       Future analysis = _performAnalysis(editor);
       analysis.then((bool codeIsClean) {
+        if (!autoRun) { // Only autorun when it's enabled by the user.
+          return;
+        }
         if (codeIsClean) {
           autoRunTimer = new Timer(new Duration(milliseconds: autoRunDelayMilliseconds), () {
             _localAll();

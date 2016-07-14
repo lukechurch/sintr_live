@@ -11,16 +11,40 @@ import 'dart:io';
 
 Future<String> sintrEntryPoint(String msg) async {
   String text = msg;
+  List<Map<String, num>> kvs = [];
 
-  List<String> words = text.split(new RegExp(r"(\s+)"));
-  List<Map<String, int>> kvs = [];
-
-  int i = 0;
-
-  for (String word in words) {
-    if (++i % 100000 == 0) break;
-    kvs.add({word: 1});
-  }
+  text.split('\n').forEach((String line) {
+    if (line.isEmpty) return;
+    List<String> tokens = line.split(' ');
+    DateTime timestamp = new DateTime.fromMillisecondsSinceEpoch(int.parse(tokens[2]));
+    int hour = timestamp.hour;
+    double accelerationX = double.parse(tokens[5]);
+    double accelerationY = double.parse(tokens[8]);
+    double accelerationZ = double.parse(tokens[11]);
+    double gyroX = double.parse(tokens[15]);
+    double gyroY = double.parse(tokens[18]);
+    double gyroZ = double.parse(tokens[21]);
+    double magnetX = double.parse(tokens[25]);
+    double magnetY = double.parse(tokens[28]);
+    double magnetZ = double.parse(tokens[31]);
+    double temperature = double.parse(tokens[34]);
+    double humidity = double.parse(tokens[36]);
+    double pressure = double.parse(tokens[38]);
+    kvs.add({
+      'hour': hour,
+      'accelerationX': accelerationX,
+      'accelerationY': accelerationY,
+      'accelerationZ': accelerationZ,
+      'gyroX': gyroX,
+      'gyroY': gyroY,
+      'gyroZ': gyroZ,
+      'magnetX': magnetX,
+      'magnetY': magnetY,
+      'magnetZ': magnetZ,
+      'temperature': temperature,
+      'humidity': humidity,
+      'pressure': pressure,});
+  });
 
   return JSON.encode(kvs);
 }

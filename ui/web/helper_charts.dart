@@ -81,6 +81,8 @@ updateChartWithData(dataToBePlotted) {
     // The labels haven't changed since last run.
   } else {
     // The labels have changed. Reset everything.
+    xAxisMenu.nodes.clear();
+    yAxisMenu.nodes.clear();
     axisLabels.forEach(
       (String label) => xAxisMenu.append(new OptionElement(data: label, value: label)));
     axisLabels.forEach(

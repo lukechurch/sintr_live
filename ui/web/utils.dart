@@ -207,13 +207,25 @@ Editor createNewEditor(DivElement editorContainer) {
     _handleAutoCompletion(editor, e);
   });
 
-  // Listener for static analysis
-  Timer timer;
-  int delayMilliseconds = 500;
+  // Listener for static analysis & auto-run
+  // Static analysis is run after 500ms from last edit in the document.
+  // The code is run locally after 150ms from the last clean static analysis.
+  Timer analysisTimer;
+  Timer autoRunTimer;
+  int analysisDelayMilliseconds = 500;
+  int autoRunDelayMilliseconds = 150;
   editor.document.onChange.listen((_) {
-    if (timer != null) timer.cancel();
-    timer = new Timer(new Duration(milliseconds: delayMilliseconds), () {
-      _performAnalysis(editor);
+    if (analysisTimer != null) analysisTimer.cancel();
+    if (autoRunTimer != null) autoRunTimer.cancel();
+    analysisTimer = new Timer(new Duration(milliseconds: analysisDelayMilliseconds), () {
+      Future analysis = _performAnalysis(editor);
+      analysis.then((bool codeIsClean) {
+        if (codeIsClean) {
+          autoRunTimer = new Timer(new Duration(milliseconds: autoRunDelayMilliseconds), () {
+            _localAll();
+          });
+        }
+      });
     });
   });
   return editor;

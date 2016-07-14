@@ -24,4 +24,4 @@ pub serve &> ~/sintr-logs/ui-pub-serve.log &
 cd ..
 
 # Front End Server
-./infrastructure/scripts/start_fe_server.sh - demo/ # &> ~/sintr-logs/fe_server.log
+./infrastructure/scripts/start_fe_server.sh - $1 # &> ~/sintr-logs/fe_server.log

@@ -24,6 +24,18 @@ void captureSaveCommand() {
         case 's':
           event.preventDefault();
           break;
+        case 'r': // Run all local
+          event.preventDefault();
+          _localAll();
+          break;
+        case 'm': // Run mapper
+          event.preventDefault();
+          _localExec();
+          break;
+        case 'd': // Run reducer
+          event.preventDefault();
+          _localReducer();
+          break;
       }
     }
   });

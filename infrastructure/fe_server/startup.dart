@@ -179,7 +179,16 @@ case '/sampleInput':
         path_lib.join(projectPath, inputFileName)).readAsStringSync()
     ))
   );
+  break;
 
+  case '/cloudFiles':
+    var inputDataMap = JSON.decode(new io.File(
+      path_lib.join(projectPath, "input.json")).readAsStringSync());
+    var inputFileNames = inputDataMap["cloud_files"];
+
+    res.add(
+      UTF8.encode(JSON.encode(inputFileNames))
+    );
 
   // res.add(UTF8.encode(JSON.encode(sampleInput)));
   // res.close();
@@ -276,7 +285,7 @@ _handlePost(io.HttpRequest request) async {
       request.response.write(response);
       break;
 
-    case "/severExec":
+    case "/serverExec":
       Map<String, String> sources = json["sources"];
       List<String> input = json["input"];
       String jobName = json["jobName"];

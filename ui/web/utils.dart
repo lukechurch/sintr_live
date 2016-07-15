@@ -299,6 +299,12 @@ void dockAndFoldAllCodeEditors() {
   }
 }
 
+Future<String> getCloudInput() async {
+  var url = '$sintrServerURL/cloudFiles';
+  return await HttpRequest.getString(url);
+}
+
+
 Future<String> getSampleInput() async {
   var url = '$sintrServerURL/sampleInput';
   return await HttpRequest.getString(url);

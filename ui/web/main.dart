@@ -336,37 +336,61 @@ _localAll() {
       ..send(JSON.encode(message));
   }
 
-_serverExec() {
-  var url = '$sintrServerURL/serverExec';
-  Map<String, String> sources = collectCodeSources();
-  String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
-  String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
-  sources = _selectExecFile(sources, "entry_point_map.dart");
+  _serverExec() async {
+    var url = '$sintrServerURL/serverExec';
+    Map<String, String> sources = collectCodeSources();
+    String rawInputString = await getCloudInput();
 
-  Map<String, dynamic> message = {
-    "sources": sources,
-    "input": [input],
-    "jobName": jobName,
-  };
-  var httpRequest = new HttpRequest();
-  httpRequest
-    ..open("POST", url)
-    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
-    ..send(JSON.encode(message));
-}
+    List<String> cloudFiles = JSON.decode(rawInputString);
 
-_getResults() {
-  var url = '$sintrServerURL/getResults';
-  String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
-  Map<String, dynamic> message = {
-    "jobName": jobName,
-  };
-  var httpRequest = new HttpRequest();
-  httpRequest
-    ..open("POST", url)
-    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
-    ..send(JSON.encode(message));
-}
+    print ("_serverExec creating: ${cloudFiles.length} files");
+
+    String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    sources = _selectExecFile(sources, "entry_point_map.dart");
+
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input": cloudFiles,
+      "jobName": jobName,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) {
+        print ("_serverExec: ${httpRequest.response}");
+      })
+      ..send(JSON.encode(message));
+  }
+
+  _getResults() {
+    var url = '$sintrServerURL/getResults';
+    String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    Map<String, dynamic> message = {
+      "jobName": jobName,
+    };
+    var httpRequest = new HttpRequest();
+    httpRequest
+      ..open("POST", url)
+      ..onLoad.listen((_) {
+        //TODO: Move this unpacking to the server
+        String responseAll = httpRequest.response;
+        List<String> responseStrings = JSON.decode(responseAll);
+
+        List results = [];
+
+        for (String response in responseStrings) {
+          print ("Decoding response: $response");
+          var result = JSON.decode(response)['result'];
+          results.add(result);
+        }
+
+        // TODO: Push this through into the panel
+        //
+        // logResponseInOutputPanel(httpRequest, 'map-output-reducer-input');
+      } )
+      ..send(JSON.encode(message));
+  }
+
 
 _getTaskStats() {
   var url = '$sintrServerURL/taskStats';

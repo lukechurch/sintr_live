@@ -276,10 +276,15 @@ void dockAndFoldAllCodeEditors() {
   }
 }
 
-void getSampleInputFromServerAndAddToUI() {
-  // Make the request to get the sample input.
+Future<String> getSampleInput() async {
   var url = '$sintrServerURL/sampleInput';
-  HttpRequest.getString(url).then((String sampleInput) {
+  return await HttpRequest.getString(url);
+}
+
+void getSampleInputFromServerAndAddToUI() {
+
+  // Make the request to get the sample input.
+  getSampleInput().then((String sampleInput) {
 
     String jsonDecoded = JSON.decode(sampleInput);
     String jsonDecodedToDisplay = jsonDecoded.length > 500 ? jsonDecoded.substring(0, charsToDisplay) + '[...]' : jsonDecoded;

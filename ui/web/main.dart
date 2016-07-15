@@ -28,6 +28,7 @@ part 'helper_server_poller.dart';
 part 'panel_definitions.dart';
 part 'utils.dart';
 
+var timer = null;
 
 DivElement mapperInput;
 DivElement mapperOutputReducerInput;
@@ -191,7 +192,12 @@ void main() {
 
   querySelector('#serverExec').onClick.listen((_) => _serverExec());
 
-  querySelector('#getResults').onClick.listen((_) => _getResults());
+  querySelector('#getResults').onClick.listen((_)  {
+    if (timer == null) {
+      timer = new Timer.periodic(new Duration(seconds: 5), (_) => _getResults());
+    }
+    // _getResults();
+  });
 
   querySelector('#taskStats').onClick.listen((_) => _getTaskStats());
 
@@ -259,14 +265,20 @@ _localExec() {
     ..send(JSON.encode(message));
 }
 
-_localReducer({Map<String, String> sources: null}) async {
-  print ("localReducer");
+// TODO: Clean this up, it's mangling assumptions with the previous layer about
+// the structure and naming of the files
+_localReducer({Map<String, String> sources: null, List<Map> data : null}) async {
+  print ("_localReducer");
+  print (data);
+
   int thisJobIndex = ++reducerJobIndex;
   activeReducerJob = reducerJobIndex;
   var url = '$sintrServerURL/localReducer';
   sources ??= collectCodeSources();
 
-  List<Map> kvs = JSON.decode(mapperOutputReducerInputData);
+  data ??= JSON.decode(mapperOutputReducerInputData);
+
+  List<Map> kvs = data;
   Map keyToValueList = shuffler.shuffle(kvs);
 
   sources = _selectExecFile(sources, "entry_point_reducer.dart");
@@ -300,7 +312,8 @@ _localReducer({Map<String, String> sources: null}) async {
       var lst = JSON.decode(JSON.decode(result)["result"]);
       dataSeenSoFar.addAll(lst);
       step++;
-      if (step % updateUIStep == 0 || step == keyToValueList.length) {
+      // if (step % updateUIStep == 0 || step == keyToValueList.length) {
+      if (step == keyToValueList.length) {
         logResponseInOutputPanelList(dataSeenSoFar, 'reducer-output');
       }
     });
@@ -337,6 +350,8 @@ _localAll() {
   }
 
   _serverExec() async {
+    _incrementJobName();
+    
     var url = '$sintrServerURL/serverExec';
     Map<String, String> sources = collectCodeSources();
     String rawInputString = await getCloudInput();
@@ -362,6 +377,13 @@ _localAll() {
       ..send(JSON.encode(message));
   }
 
+  _incrementJobName() {
+    String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    String jobPrefix = jobName.split('_')[0];
+    jobName = "${jobPrefix}_${new DateTime.now().millisecondsSinceEpoch}";
+    (querySelector('#server-job-name-textfield') as InputElement).value = jobName;
+  }
+
   _getResults() {
     var url = '$sintrServerURL/getResults';
     String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
@@ -380,9 +402,17 @@ _localAll() {
 
         for (String response in responseStrings) {
           print ("Decoding response: $response");
-          var result = JSON.decode(response)['result'];
-          results.add(result);
+          var result = JSON.decode(JSON.decode(response)['result']);
+          results.addAll(result);
         }
+
+        // Run the reducer on this
+        _localReducer(sources: collectCodeSources(), data: results);
+
+
+
+        // print (results);
+        // logResponseInOutputPanelList(results, 'reducer-output');
 
         // TODO: Push this through into the panel
         //

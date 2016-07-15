@@ -36,6 +36,10 @@ void captureSaveCommand() {
           event.preventDefault();
           _localReducer();
           break;
+        case 'l': // Run Remote
+          event.preventDefault();
+          _serverExec();
+          break;
       }
     }
   });

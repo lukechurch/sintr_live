@@ -167,7 +167,13 @@ int charsToDisplay = 10000;
 logResponseInOutputPanel(HttpRequest request, String panelId) {
   String responseText = request.responseText;
   if (request.status == 200) {
-    String responseText = request.responseText;
+    logResponseInOutputPanelText(request.responseText, panelId);
+  } else {
+    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = 'Request failed, status=${request.status}\n\n$responseText';
+  }
+}
+
+logResponseInOutputPanelText(String responseText, String panelId) {
     var response;
     // Try to encode with it a JSON pretty printer
     try {
@@ -184,7 +190,7 @@ logResponseInOutputPanel(HttpRequest request, String panelId) {
     if (response is List) {
       response = {'dataSeries': response};
     }
-    String responseTextToDisplay = responseText.length > 500 ? responseText.substring(0, charsToDisplay) + '[...]' : responseText;
+    String responseTextToDisplay = responseText.length > charsToDisplay ? responseText.substring(0, charsToDisplay) + '[...]' : responseText;
     querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseTextToDisplay;
     if (panelId == 'map-output-reducer-input') {
       mapperOutputReducerInputData = responseText;
@@ -193,9 +199,26 @@ logResponseInOutputPanel(HttpRequest request, String panelId) {
       reducerOutputData = responseText;
       updateChartWithData(response);
     }
-  } else {
-    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = 'Request failed, status=${request.status}\n\n$responseText';
-  }
+}
+
+logResponseInOutputPanelList(List response, String panelId) {
+      JsonEncoder encoder = new JsonEncoder.withIndent("  ");
+      var responseText = encoder.convert(response);
+
+      Map responseMap;
+
+    if (response is List) {
+      responseMap = {'dataSeries': response};
+    }
+    String responseTextToDisplay = responseText.length > charsToDisplay ? responseText.substring(0, charsToDisplay) + '[...]' : responseText;
+    querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseTextToDisplay;
+    if (panelId == 'map-output-reducer-input') {
+      mapperOutputReducerInputData = responseText;
+    }
+    if (panelId == 'reducer-output') { // TODO(mariana): This is a bit fragile like this, consider refactoring.
+      reducerOutputData = responseText;
+      updateChartWithData(responseMap);
+    }
 }
 
 addNewCodeEditorPanel({String filename: 'default.dart', String code: ''}) {
@@ -282,7 +305,7 @@ void getSampleInputFromServerAndAddToUI() {
   HttpRequest.getString(url).then((String sampleInput) {
 
     String jsonDecoded = JSON.decode(sampleInput);
-    String jsonDecodedToDisplay = jsonDecoded.length > 500 ? jsonDecoded.substring(0, charsToDisplay) + '[...]' : jsonDecoded;
+    String jsonDecodedToDisplay = jsonDecoded.length > charsToDisplay ? jsonDecoded.substring(0, charsToDisplay) + '[...]' : jsonDecoded;
     mapperInput.querySelector('.card-contents').querySelector('pre').text = jsonDecodedToDisplay;
     mapperInputData = jsonDecoded;
   });

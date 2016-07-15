@@ -19,6 +19,7 @@ import 'package:sintr_ui/editing/editor_codemirror.dart';
 import 'package:sintr_ui/editing/editor.dart';
 import 'package:sintr_ui/editing/keys.dart';
 import 'package:sintr_ui/services/dartservices.dart' as dartservices;
+import 'package:sintr_ui/in_memory_shuffler.dart' as shuffler;
 
 part 'helper_charts.dart';
 part 'helper_editor.dart';
@@ -71,6 +72,9 @@ int heightUnit;
 // A boolean set in the UI that marks whether the run command is sent only
 // when clicking the Run button or automatically, after every keystroke.
 bool autoRun;
+
+int activeReducerJob = -1;
+int reducerJobIndex = 0;
 
 void runCode() {
   // TODO(mariana) Should be replaced with calls to local or remote exec.
@@ -255,22 +259,59 @@ _localExec() {
     ..send(JSON.encode(message));
 }
 
-_localReducer() {
+_localReducer({Map<String, String> sources: null}) async {
   print ("localReducer");
-
+  int thisJobIndex = ++reducerJobIndex;
+  activeReducerJob = reducerJobIndex;
   var url = '$sintrServerURL/localReducer';
-  Map<String, String> sources = collectCodeSources();
+  sources ??= collectCodeSources();
+
+  List<Map> kvs = JSON.decode(mapperOutputReducerInputData);
+  Map keyToValueList = shuffler.shuffle(kvs);
+
   sources = _selectExecFile(sources, "entry_point_reducer.dart");
 
-  Map<String, dynamic> message = {
-    "sources": sources,
-    "input": mapperOutputReducerInputData,
-  };
-  var httpRequest = new HttpRequest();
-  httpRequest
-    ..open("POST", url)
-    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'reducer-output'))
-    ..send(JSON.encode(message));
+  List<Map> dataSeenSoFar = [];
+
+  int updateUIStep = 50;
+  int step = 0;
+  for (var k in keyToValueList.keys) {
+    if (thisJobIndex != activeReducerJob) {
+      return;
+    }
+    var values = keyToValueList[k];
+
+    Map<String, dynamic> message = {
+      "sources": sources,
+      "input":
+        JSON.encode( {k : values} )
+    };
+
+    // k, values
+    var httpRequest = new HttpRequest();
+    httpRequest.open("POST", url);
+    httpRequest.onLoad.listen((_) {
+      if (thisJobIndex != activeReducerJob) {
+        // The user has activated another reduce job, cancel this one.
+        print('Cancelling reducer $thisJobIndex');
+        return;
+      }
+      String result = httpRequest.responseText;
+      var lst = JSON.decode(JSON.decode(result)["result"]);
+      dataSeenSoFar.addAll(lst);
+      step++;
+      if (step % updateUIStep == 0 || step == keyToValueList.length) {
+        logResponseInOutputPanelList(dataSeenSoFar, 'reducer-output');
+      }
+    });
+    httpRequest.send(JSON.encode(message));
+
+    // The higher the number here, the better it can switch from a reduce job
+    // to another. 40ms seems to be about the time it takes for the request to
+    // be completed, so processing the old request and sending a new one happens
+    // at the same time.
+    await new Future.delayed(const Duration(milliseconds: 10));
+  }
 }
 
 _localAll() {
@@ -289,23 +330,8 @@ _localAll() {
       ..onLoad.listen((_) {
         logResponseInOutputPanel(httpRequest, 'map-output-reducer-input');
 
-        // Run the reducer
-        print ("localReducer");
-
-        var url = '$sintrServerURL/localReducer';
-        sources = _selectExecFile(sources, "entry_point_reducer.dart");
-
-        Map<String, dynamic> message = {
-          "sources": sources,
-          "input": mapperOutputReducerInputData,
-        };
-        var httpRequestRed = new HttpRequest();
-        httpRequestRed
-          ..open("POST", url)
-          ..onLoad.listen((_) => logResponseInOutputPanel(httpRequestRed, 'reducer-output'))
-          ..send(JSON.encode(message));
-
-
+        // Run the reducer with the same sources as the mapper.
+        _localReducer(sources: sources);
       })
       ..send(JSON.encode(message));
   }

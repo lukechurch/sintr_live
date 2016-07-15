@@ -7,7 +7,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+// String -> List<Map<Key, Value>>
 
 Future<String> sintrEntryPoint(String msg) async {
   String text = msg;
@@ -40,7 +41,9 @@ Future<String> sintrEntryPoint(String msg) async {
   List<Map<String, Map>> kvs = [];
   intervalMap.forEach((int intervalStart, int count) {
     DateTime time = new DateTime.fromMillisecondsSinceEpoch(intervalStart * intervalSizeInSeconds * 1000);
-    kvs.add({'${time.hour}:${time.minute}': count});
+    kvs.add({
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}': count
+    });
   });
 
   return JSON.encode(kvs);

@@ -7,10 +7,20 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'file_getter.dart' as cloud_files;
 
 // String -> List<Map<Key, Value>>
 
 Future<String> sintrEntryPoint(String msg) async {
+    // Hack to detect file names
+  if (msg.startsWith("hog-data/AccelData")) {
+    cloud_files.setup();
+    // It's a file, download and open it
+    var path = await cloud_files.download("sintr-sample-test-data", msg.trim());
+    msg = new File(path).readAsStringSync();
+  }
+
   String text = msg;
   List<Map<String, dynamic>> varianceData = [];
 

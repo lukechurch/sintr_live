@@ -7,33 +7,17 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 Future<String> sintrEntryPoint(String msg) async {
-  List<Map<String, int>> kvsInput = JSON.decode(msg);
-  Map<String, List<int>> shuffledInput = shuffle(kvsInput);
-  List<Map<String, int>> kvsOutput = [];
+  Map<String, List<int>> kvList = JSON.decode(msg);
+  String timeOfDay = kvList.keys.first;
+  List<int> counts = kvList.values.first;
+  int countsSum = counts.fold(0, (sum, a) => sum + a);
 
-  shuffledInput.forEach((String timeOfDay, List<int> values) {
-    Map<String, int> kv = {'timeOfDay': timeOfDay, 'hogPresence': 0};
-    values.forEach((int value) {
-        kv['hogPresence'] += value;
-    });
-    kvsOutput.add(kv);
-  });
-
-  return JSON.encode(kvsOutput);
-}
-
-Map shuffle(List<Map> data) {
-  Map results = {};
-  for (Map kv in data) {
-    assert(kv.length == 1);
-    var key = kv.keys.first;
-    var value = kv.values.first;
-
-    results.putIfAbsent(key, () => []);
-    results[key].add(value);
-  }
-  return results;
+  return JSON.encode([
+    {
+      'timeOfDay': timeOfDay,
+      'hogPresence': countsSum
+    }
+  ]);
 }

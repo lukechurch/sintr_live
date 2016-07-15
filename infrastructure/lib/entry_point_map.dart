@@ -8,7 +8,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 Future<String> sintrEntryPoint(String msg) async {
   String text = msg;

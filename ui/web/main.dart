@@ -57,8 +57,9 @@ dartservices.DartservicesApi dartServices;
 final MaterialSnackbar snackbar = new MaterialSnackbar();
 
 Map<DivElement, Editor> editors = {};
-Map resultsData = {};
-Map resultsErrors = {};
+String mapperInputData = '';
+String mapperOutputReducerInputData = '';
+String reducerOutputData = '';
 
 int pageWidth;
 int pageHeight;
@@ -91,7 +92,6 @@ void main() {
 
   // Initialize the elements of the UI.
   mapperInput = newInputOutputPanel('Map input', 'map-input');
-  mapperInput.querySelector('pre').contentEditable = 'true';
   mapperOutputReducerInput = newInputOutputPanel('Map output / Reducer input', 'map-output-reducer-input');
   reducerOutput = newInputOutputPanel('Reducer output', 'reducer-output');
   reducerChart = newChartPanel('reducer-chart');
@@ -242,12 +242,11 @@ _localExec() {
   print ("localExec");
   var url = '$sintrServerURL/localExec';
   Map<String, String> sources = collectCodeSources();
-  String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
   sources = _selectExecFile(sources, "entry_point_map.dart");
 
   Map<String, dynamic> message = {
     "sources": sources,
-    "input": input,
+    "input": mapperInputData,
   };
   var httpRequest = new HttpRequest();
   httpRequest
@@ -261,12 +260,11 @@ _localReducer() {
 
   var url = '$sintrServerURL/localReducer';
   Map<String, String> sources = collectCodeSources();
-  String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
   sources = _selectExecFile(sources, "entry_point_reducer.dart");
 
   Map<String, dynamic> message = {
     "sources": sources,
-    "input": input,
+    "input": mapperOutputReducerInputData,
   };
   var httpRequest = new HttpRequest();
   httpRequest
@@ -279,12 +277,11 @@ _localAll() {
     print ("localExec-All");
     var url = '$sintrServerURL/localExec';
     Map<String, String> sources = collectCodeSources();
-    String input = querySelector('#map-input').querySelector('.card-contents').querySelector('pre').text;
     sources = _selectExecFile(sources, "entry_point_map.dart");
 
     Map<String, dynamic> message = {
       "sources": sources,
-      "input": input,
+      "input": mapperInputData,
     };
     var httpRequest = new HttpRequest();
     httpRequest
@@ -296,13 +293,11 @@ _localAll() {
         print ("localReducer");
 
         var url = '$sintrServerURL/localReducer';
-        Map<String, String> sources = collectCodeSources();
-        String input = querySelector('#map-output-reducer-input').querySelector('.card-contents').querySelector('pre').text;
         sources = _selectExecFile(sources, "entry_point_reducer.dart");
 
         Map<String, dynamic> message = {
           "sources": sources,
-          "input": input,
+          "input": mapperOutputReducerInputData,
         };
         var httpRequestRed = new HttpRequest();
         httpRequestRed

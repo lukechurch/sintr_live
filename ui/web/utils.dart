@@ -202,14 +202,10 @@ logResponseInOutputPanelText(String responseText, String panelId) {
 }
 
 logResponseInOutputPanelList(List response, String panelId) {
-      JsonEncoder encoder = new JsonEncoder.withIndent("  ");
-      var responseText = encoder.convert(response);
+    JsonEncoder encoder = new JsonEncoder.withIndent("  ");
+    var responseText = encoder.convert(response);
+    Map responseMap = {'dataSeries': response};
 
-      Map responseMap;
-
-    if (response is List) {
-      responseMap = {'dataSeries': response};
-    }
     String responseTextToDisplay = responseText.length > charsToDisplay ? responseText.substring(0, charsToDisplay) + '[...]' : responseText;
     querySelector('#$panelId').querySelector('.card-contents').querySelector('pre').text = responseTextToDisplay;
     if (panelId == 'map-output-reducer-input') {
@@ -219,6 +215,40 @@ logResponseInOutputPanelList(List response, String panelId) {
       reducerOutputData = responseText;
       updateChartWithData(responseMap);
     }
+}
+
+/// [LifecycleState] tracks a task through its lifetime
+/// Should be kept in sync with https://github.com/lukechurch/sintr_live_common/blob/master/lib/tasks.dart
+enum LifecycleState {
+  READY, // Ready for allocation
+  ALLOCATED, // Allocated to a node
+  STARTED, // Execution has begun, this may go back to READY if it fails
+  DONE, // Successfully compute
+  DEAD // Terminally dead, won't be retried
+}
+
+displayTaskStatsInPanel(HttpRequest request, String panelId) {
+  PreElement htmlElementDestination = querySelector('#$panelId').querySelector('.card-contents').querySelector('pre');
+  var responseText = request.responseText;
+  if (request.status == 200) {
+    Map<String, Map<int, int>> status;
+    try {
+      status = JSON.decode(responseText);
+    } catch (e, st) {
+      print ("Decoding failed");
+      print (e);
+      print (st);
+      return;
+    }
+
+    String jobName = (querySelector('#server-job-name-textfield') as InputElement).value;
+    Map<int, int> jobStatus = status[jobName];
+
+    var results = jobStatus.keys.map((k) => "${LifecycleState.values[k]}: ${jobStatus[k]}");
+    htmlElementDestination.text = results.join("\n");
+  } else {
+    htmlElementDestination.text = 'Request failed, status=${request.status}\n\n$responseText';
+  }
 }
 
 addNewCodeEditorPanel({String filename: 'default.dart', String code: ''}) {

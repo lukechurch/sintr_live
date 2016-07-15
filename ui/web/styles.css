@@ -29,6 +29,8 @@ html, body {
 
 .panel {
   position: absolute;
+  display: flex;
+  flex-direction: column;
 }
 
 .panel:hover {
@@ -101,14 +103,6 @@ html, body {
 
 .mdl-panel {
   padding: 16px;
-}
-
-#map-input,
-#map-output-reducer-input,
-#reducer-output,
-#errors-output {
-  display: flex;
-  flex-direction: column;
 }
 
 #reducer-chart {

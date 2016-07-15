@@ -397,7 +397,7 @@ _getTaskStats() {
   var httpRequest = new HttpRequest();
   httpRequest
     ..open("POST", url)
-    ..onLoad.listen((_) => logResponseInOutputPanel(httpRequest, 'map-output-reducer-input'))
+    ..onLoad.listen((_) => displayTaskStatsInPanel(httpRequest, 'tasks-status'))
     ..send(JSON.encode('taskStats'));
 }
 
